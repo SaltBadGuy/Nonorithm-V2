@@ -1,19 +1,19 @@
 fileFormatVersion: 2
-guid: 64063bfd7aa01d24b92b1095f8414229
+guid: 13872d9a292ff2841a16e4b2001fae8a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6750033715232265413
-    second: CellBlank
+      213: 6249309093219675765
+    second: AxisEdge
   - first:
-      213: 3240621668641761797
-    second: CellEmpty
+      213: -2504969989741281974
+    second: AxisMiddle
   - first:
-      213: 3857691771022356991
-    second: CellFull
+      213: -3586241619922077911
+    second: AxisOneoff
   - first:
-      213: -2061980447685304011
-    second: CellMark
+      213: -2044487625990589407
+    second: AxisBlank
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CellBlank
+      name: AxisEdge
       rect:
         serializedVersion: 2
         x: 0
@@ -153,14 +153,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5c4545a96efecad50800000000000000
-      internalID: 6750033715232265413
+      spriteID: 57e2af092810ab650800000000000000
+      internalID: 6249309093219675765
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CellEmpty
+      name: AxisMiddle
       rect:
         serializedVersion: 2
         x: 32
@@ -174,14 +174,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 50a63d2fc3009fc20800000000000000
-      internalID: 3240621668641761797
+      spriteID: a4df474f01f8c3dd0800000000000000
+      internalID: -2504969989741281974
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CellFull
+      name: AxisOneoff
       rect:
         serializedVersion: 2
         x: 64
@@ -195,14 +195,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ff13cb01a36498530800000000000000
-      internalID: 3857691771022356991
+      spriteID: 927b2d55f3c1b3ec0800000000000000
+      internalID: -3586241619922077911
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CellMark
+      name: AxisBlank
       rect:
         serializedVersion: 2
         x: 96
@@ -216,8 +216,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 531aae925bf5263e0800000000000000
-      internalID: -2061980447685304011
+      spriteID: 1243629165580a3e0800000000000000
+      internalID: -2044487625990589407
       vertices: []
       indices: 
       edges: []

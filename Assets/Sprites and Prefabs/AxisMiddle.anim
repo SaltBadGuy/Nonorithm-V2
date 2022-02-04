@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Empty
+  m_Name: AxisMiddle
   serializedVersion: 6
   m_Legacy: 0
   m_Compressed: 0
@@ -20,9 +20,9 @@ AnimationClip:
   m_PPtrCurves:
   - curve:
     - time: 0
-      value: {fileID: 3240621668641761797, guid: 64063bfd7aa01d24b92b1095f8414229, type: 3}
+      value: {fileID: -2504969989741281974, guid: 13872d9a292ff2841a16e4b2001fae8a, type: 3}
     attribute: m_Sprite
-    path: 
+    path: Axis
     classID: 212
     script: {fileID: 0}
   m_SampleRate: 60
@@ -33,14 +33,14 @@ AnimationClip:
   m_ClipBindingConstant:
     genericBindings:
     - serializedVersion: 2
-      path: 0
+      path: 624765380
       attribute: 0
       script: {fileID: 0}
       typeID: 212
       customType: 23
       isPPtrCurve: 1
     pptrCurveMapping:
-    - {fileID: 3240621668641761797, guid: 64063bfd7aa01d24b92b1095f8414229, type: 3}
+    - {fileID: -2504969989741281974, guid: 13872d9a292ff2841a16e4b2001fae8a, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}

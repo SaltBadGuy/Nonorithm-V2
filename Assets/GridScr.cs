@@ -84,9 +84,7 @@ public class GridScr : MonoBehaviour
         }
 
         GridArr = new GridClass[Grid.GetLength(0) + 1, Grid.GetLength(1) + 1];
-        InputScript.SelGrid.MaxX = GridArr.GetLength(0) - 1; InputScript.SelGrid.MaxY = GridArr.GetLength(1) - 1;
-
-        Debug.Log("The grid is " + GridArr.GetLength(0) + " wide and " + GridArr.GetLength(1) + " tall");
+        InputScript.SelGrid.MaxCo = new Vector2 (GridArr.GetLength(0) - 1, GridArr.GetLength(1) - 1);
 
         //Initialising 0 indices for clues 
         for (int X = 1; X < GridArr.GetLength(0); X++)
@@ -113,8 +111,6 @@ public class GridScr : MonoBehaviour
         {
             for (int Y = 1; Y < GridArr.GetLength(1); Y++)
             {
-                //Debug.Log(X + ", " + Y);
-
                 //Initializing all 1-based indices for cells
                 GridArr[X, Y] = new GridClass
                 {
@@ -127,9 +123,8 @@ public class GridScr : MonoBehaviour
                 GridArr[X, Y].CellCla.State = 2;
                 //We need to add 1 to X and Y to account for GridArr being 1-based.
                 GridArr[X, Y].CellCla.CorrectState = Grid[X-1, Y-1];
-                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().CorrectState = Grid[X - 1, Y  - 1];
-                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().GridX = X;
-                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().GridY = Y;
+                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().CorrectCellState = Grid[X - 1, Y  - 1];
+                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().GridCo = new Vector2 (X,Y);
 
                 //We generate clues by tracking how many active blocks (1s) are together. This defaults to 0. If the block length is more than 1 and the cell is 0, this ends the particular clue and moves forward in the list.
 
@@ -172,8 +167,6 @@ public class GridScr : MonoBehaviour
             Clue.GetComponent<TextMeshPro>().lineSpacing = 10000;
             Clue.GetComponent<RectTransform>().sizeDelta = new Vector2(160, CellSize * 200);
             Clue.GetComponent<RectTransform>().pivot = new Vector2(1, 0.5f);
-
-            //Debug.Log("The Cluelist for the row " + X + " was " + ClueList);
         }
 
         for (int Y = 1; Y <= Grid.GetLength(0); Y++)
@@ -190,8 +183,6 @@ public class GridScr : MonoBehaviour
             GameObject Clue = Instantiate(CluePre, new Vector3(CellSize * (Y - 1), 0.32f, 0), Quaternion.identity, gameObject.transform);
             Clue.name = "Column " + Y + " Clue";
             Clue.GetComponent<TextMeshPro>().text = ClueList;
-
-            //Debug.Log("The Cluelist for the column " + Y + " was " + ClueList);
         }        
     }
     
@@ -211,17 +202,17 @@ public class GridScr : MonoBehaviour
     public void Edit(InputScr.HoldInput hi)
     {
         //If cell already edited to the same state, makes the cell blank. This also notes what cell was changed to account for hold interactions.
-        if (!hi.InitialPressed)
+        if (hi.RepeatTimes == 1)
         {
-            if (GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State != hi.SendState)
+            if (GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State != hi.SendState)
             {
-                hi.InitialCellState = GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State;
-                GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State = hi.SendState; GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.Cell.GetComponent<CellScr>().State = hi.SendState;
+                hi.InitialCellState = GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State;
+                GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State = hi.SendState; GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().CellState = hi.SendState;
             }
             else
             {
-                hi.InitialCellState = GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State;
-                GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State = 2; GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.Cell.GetComponent<CellScr>().State = 2;
+                hi.InitialCellState = GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State;
+                GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State = 2; GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().CellState = 2;
             }
         }
         /* 
@@ -232,16 +223,16 @@ public class GridScr : MonoBehaviour
         {
             if (hi.InitialCellState != hi.SendState)
             {
-                if (GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State != 0 && GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State != 1)
+                if (GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State != 0 && GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State != 1)
                 {
-                    GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State = hi.SendState; GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.Cell.GetComponent<CellScr>().State = hi.SendState;
+                    GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State = hi.SendState; GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().CellState = hi.SendState;
                 }
             }
             else
             {
-                if (GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State == hi.InitialCellState)
+                if (GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State == hi.InitialCellState)
                 {
-                    GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.State = 2; GridArr[InputScript.SelGrid.X, InputScript.SelGrid.Y].CellCla.Cell.GetComponent<CellScr>().State = 2;
+                    GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State = 2; GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().CellState = 2;
                 }
             }
         }
