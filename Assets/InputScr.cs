@@ -15,10 +15,11 @@ public class InputScr : MonoBehaviour
     [System.Serializable]
     public class SelectIndice
     {
-        public Vector2 SelCo = new Vector2(1,1); //{ get; set; }
-        public Vector2 HeldCo = new Vector2(1,1);
-        public Vector2 MinCo = new Vector2(1,1);
-        public Vector2 MaxCo = new Vector2(1,1);
+        public Vector2Int RawCo = new Vector2Int(1, 1);
+        public Vector2Int SelCo = new Vector2Int(1,1); //{ get; set; }
+        public Vector2Int HeldCo = new Vector2Int(1,1);
+        public Vector2Int MinCo = new Vector2Int(1,1);
+        public Vector2Int MaxCo = new Vector2Int(1,1);
         public bool ButtonHeld = false;
         public int ControlState = 0;
     }
@@ -42,13 +43,15 @@ public class InputScr : MonoBehaviour
     [System.Serializable]
     public class HoldInput
     {
-        public Vector2 Dir;
+        public Vector2Int Dir;
         public int HoldTimer = 0;
-        public int HoldInterval = 100;
+        public int HoldInterval = 50;
         public int RepeatInterval = 50;
         public int RepeatTimes = 0;
         public int InitialCellState = 2;
         public int ButtonState = 0;
+        public bool Hori = true;
+        public bool Vert = true;
         public int SendState;
     }
 
@@ -56,6 +59,9 @@ public class InputScr : MonoBehaviour
     public SelectIndice SelGrid;
     public GameObject SelectIndiPre;
     GameObject SelectIndi;
+
+    public GameObject RawSelectIndiPre;
+    GameObject RawSelectIndi;
 
     //This class lets us have behaviour for holding down a button similar to holding down a key in a word processor (ie. you must hold the button down for it for HoldInterval to start repeating the action at RepeatIntervals)
     public HoldInput MoveInput = new HoldInput { };
@@ -68,6 +74,7 @@ public class InputScr : MonoBehaviour
     void Start()
     {
         SelectIndi = Instantiate(SelectIndiPre);
+        RawSelectIndi = Instantiate(RawSelectIndiPre);
         SelectIndi.name = "Select Indicator";
         EmptyInput.SendState = 0;
         FillInput.SendState = 1;
@@ -79,18 +86,58 @@ public class InputScr : MonoBehaviour
     {
         if (GridScript.GridArr[1,1].CellCla != null && SelGrid.ControlState != 2)
         {
-            SelectIndi.transform.position = new Vector3(GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.transform.position.x, GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.transform.position.y, -1);
+            SelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Cell.transform.position.x, GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Cell.transform.position.y, -2);
         }
         else
         {
             SelectIndi.transform.position = new Vector3(SelectIndi.transform.position.x, SelectIndi.transform.position.y, 0);
         }
 
+        if (GridScript.GridArr[1, 1].CellCla != null && SelGrid.ControlState != 2)
+        {
+            RawSelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.Cell.transform.position.x, GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.Cell.transform.position.y, -1);
+        }
+        else
+        {
+            RawSelectIndi.transform.position = new Vector3(RawSelectIndi.transform.position.x, RawSelectIndi.transform.position.y, 0);
+        }
+
         CheckGenericHolds();
-        AttemptMovement();
+        AttemptRawMovement(MoveInput.Dir);
+        AttemptSelMovement(MoveInput.Dir);
         AttemptEditGrid(EmptyInput);
         AttemptEditGrid(FillInput);
-        AttemptEditGrid(MarkInput);        
+        AttemptEditGrid(MarkInput);
+        CheckAxis();
+    }
+
+    void CheckAxis()
+    {
+        for (int X = 1; X < GridScript.GridArr.GetLength(0); X++)
+        {
+            for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+            {
+                GridScript.GridArr[X,Y].CellCla.Cell.GetComponent<CellScr>().Axis = false ;
+            }
+        }
+        if (SelGrid.ButtonHeld)
+        {
+            if (SelGrid.SelCo.x == SelGrid.HeldCo.x)
+            {
+
+                for (int i = Mathf.Min((int)SelGrid.SelCo.y, (int)SelGrid.HeldCo.y); i <= Mathf.Max((int)SelGrid.SelCo.y, (int)SelGrid.HeldCo.y); i++)
+                {
+                    GridScript.GridArr[(int)SelGrid.HeldCo.x, i].CellCla.Cell.GetComponent<CellScr>().Axis = true;
+                }
+            }
+            else
+            {
+                for (int i = Mathf.Min((int)SelGrid.SelCo.x, (int)SelGrid.HeldCo.x); i <= Mathf.Max((int)SelGrid.SelCo.x, (int)SelGrid.HeldCo.x); i++)
+                {
+                    GridScript.GridArr[i, (int)SelGrid.HeldCo.y].CellCla.Cell.GetComponent<CellScr>().Axis = true;
+                }
+            }
+        }
     }
 
     public void CheckGenericHolds()
@@ -98,87 +145,115 @@ public class InputScr : MonoBehaviour
         if (EmptyInput.ButtonState == 1) { EmptyInput.HoldTimer++; } else if (EmptyInput.ButtonState == 0) { EmptyInput.HoldTimer = 0; EmptyInput.RepeatTimes = 0; ; };
         if (FillInput.ButtonState == 1) { FillInput.HoldTimer++; } else if (FillInput.ButtonState == 0) { FillInput.HoldTimer = 0; FillInput.RepeatTimes = 0; };
         if (MarkInput.ButtonState == 1) { MarkInput.HoldTimer++; } else if (MarkInput.ButtonState == 0) { MarkInput.HoldTimer = 0; MarkInput.RepeatTimes = 0; };
-        if (MoveInput.Dir != Vector2.zero) { MoveInput.HoldTimer++; } else { MoveInput.HoldTimer = 0; MoveInput.RepeatTimes = 0; }
-        if ((EmptyInput.HoldTimer > EmptyInput.HoldInterval || FillInput.HoldTimer > FillInput.HoldInterval || MarkInput.HoldTimer > MarkInput.HoldInterval)) {
+        if (MoveInput.Dir != Vector2Int.zero) { MoveInput.HoldTimer++; } else { MoveInput.HoldTimer = 0; MoveInput.RepeatTimes = 0; }
+        if (EmptyInput.HoldTimer > EmptyInput.HoldInterval || FillInput.HoldTimer > FillInput.HoldInterval || MarkInput.HoldTimer > MarkInput.HoldInterval) {
             if (!SelGrid.ButtonHeld) 
             { 
-                SelGrid.HeldCo = SelGrid.SelCo; GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().Axis = true; 
+                SelGrid.HeldCo = SelGrid.SelCo; 
             }  
             SelGrid.ButtonHeld = true; 
         } 
-        else { SelGrid.ButtonHeld = false; }
+        else { SelGrid.ButtonHeld = false; MoveInput.Hori = true; MoveInput.Vert = true; SelGrid.SelCo = SelGrid.RawCo; }
     }
 
-    public void AttemptMovement() 
+    public Vector2Int Move(Vector2Int co, int x, int y)
     {
+
+        co += new Vector2Int(x, y);
+        if (co.x < SelGrid.MinCo.x) { co.x = SelGrid.MinCo.x; }; if (co.y < SelGrid.MinCo.y) { co.y = SelGrid.MinCo.y; };
+        if (co.x > SelGrid.MaxCo.x) { co.x = SelGrid.MaxCo.x; }; if (co.y > SelGrid.MaxCo.y) { co.y = SelGrid.MaxCo.y; };
+        return co;
+    }
+
+    public void AttemptRawMovement(Vector2Int Dir)
+    {
+        //We flip the y coordinate if coming in using keyboard (moving down on the grid makes the y coordinate go up on the relevant cell, but down on keyboard is a (0, -1) vector)
+        if (SelGrid.ControlState == 0) { Dir.y = -MoveInput.Dir.y; }
+
+        if (SelGrid.ControlState == 1 || MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
+        {
+            SelGrid.RawCo = Move(SelGrid.RawCo, Dir.x, Dir.y);
+        }
+    }
+
+    public void LockAxis(Vector2Int Dir)
+    {
+        //This assumes that input has been "cleaned" to not allow for diagonal inputs.
+        if(Mathf.Abs(Dir.x) > 0)
+        {
+            MoveInput.Vert = false;
+        }
+        else
+        {
+            MoveInput.Hori = false;
+        }
+    }
+
+    public void AttemptSelMovement(Vector2Int Dir) 
+    {
+        //We flip the y coordinate if coming in using keyboard (moving down on the grid makes the y coordinate go up on the relevant cell, but down on keyboard is a (0, -1) vector)
+        if (SelGrid.ControlState == 0) { Dir.y = -MoveInput.Dir.y; }
+
         //We check if a direction is being pressed. If so, we then check if we are able to move
         if (!SelGrid.ButtonHeld)
         {
-            if (MoveInput.Dir != Vector2.zero && SelGrid.ControlState == 0)
+            if (Dir != Vector2.zero)
             {
-                if (MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
+                if (SelGrid.ControlState == 1 || MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
                 {
                     MoveInput.RepeatTimes++;
-                    SelGrid.SelCo += new Vector2(MoveInput.Dir.x, -MoveInput.Dir.y);
-                    //If a button is being held, the axis is locked so that you can only travel vertically or horizontally from the initially held cell
-                    if (SelGrid.SelCo.x < SelGrid.MinCo.x) { SelGrid.SelCo.x = SelGrid.MinCo.x; }; if (SelGrid.SelCo.y < SelGrid.MinCo.y) { SelGrid.SelCo.y = SelGrid.MinCo.y; };
-                    if (SelGrid.SelCo.x > SelGrid.MaxCo.x) { SelGrid.SelCo.x = SelGrid.MaxCo.x; }; if (SelGrid.SelCo.y > SelGrid.MaxCo.y) { SelGrid.SelCo.y = SelGrid.MaxCo.y; };
+                    SelGrid.SelCo = Move(SelGrid.SelCo, Dir.x, Dir.y);
                 }
             }
         }
         else
         {
             //If a button is being held down, we force the select indicator to stay on an axis (it cannot go diagonally and it cannot move horizontally then vertically etc.)
-            if (MoveInput.Dir != Vector2.zero)
+            if (Dir != Vector2.zero)
             {
-                if (SelGrid.SelCo == SelGrid.HeldCo && !(MoveInput.Dir.x != 0 && MoveInput.Dir.y != 0))
+                if (SelGrid.SelCo == SelGrid.HeldCo && !(Dir.x != 0 && Dir.y != 0) && MoveInput.Hori && MoveInput.Vert)
                 {
-                    if (MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
+
+                    if (SelGrid.ControlState == 1 || MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
                     {
-                        MoveInput.RepeatTimes++;
-                        SelGrid.SelCo += new Vector2(MoveInput.Dir.x, -MoveInput.Dir.y);
-                        if (SelGrid.SelCo.x < SelGrid.MinCo.x) { SelGrid.SelCo.x = SelGrid.MinCo.x; }; if (SelGrid.SelCo.y < SelGrid.MinCo.y) { SelGrid.SelCo.y = SelGrid.MinCo.y; };
-                        if (SelGrid.SelCo.x > SelGrid.MaxCo.x) { SelGrid.SelCo.x = SelGrid.MaxCo.x; }; if (SelGrid.SelCo.y > SelGrid.MaxCo.y) { SelGrid.SelCo.y = SelGrid.MaxCo.y; };
+                        if (SelGrid.ControlState == 0) { MoveInput.RepeatTimes++; }
+                        LockAxis(Dir);
+                        SelGrid.SelCo = Move(SelGrid.SelCo, Dir.x, Dir.y);
+
                     }
                 }
-                else if (SelGrid.SelCo.y == SelGrid.HeldCo.y)
+                else if (MoveInput.Hori && !MoveInput.Vert)
                 {
-                    if (MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
+                    if (SelGrid.ControlState == 1 || MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
                     {
-                        MoveInput.RepeatTimes++;
-                        SelGrid.SelCo += new Vector2(MoveInput.Dir.x, 0);
-                        GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().Axis = !GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().Axis;
-                        if (SelGrid.SelCo.x < SelGrid.MinCo.x) { SelGrid.SelCo.x = SelGrid.MinCo.x; }; if (SelGrid.SelCo.y < SelGrid.MinCo.y) { SelGrid.SelCo.y = SelGrid.MinCo.y; };
-                        if (SelGrid.SelCo.x > SelGrid.MaxCo.x) { SelGrid.SelCo.x = SelGrid.MaxCo.x; }; if (SelGrid.SelCo.y > SelGrid.MaxCo.y) { SelGrid.SelCo.y = SelGrid.MaxCo.y; };
+                        if (SelGrid.ControlState == 0) { MoveInput.RepeatTimes++; }
+                        SelGrid.SelCo = Move(SelGrid.SelCo, Dir.x, 0);
                     }
                 }
-                else if (SelGrid.SelCo.x == SelGrid.HeldCo.x)
+                else if (!MoveInput.Hori && MoveInput.Vert)
                 {
-                    if (MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
+                    if (SelGrid.ControlState == 1 || MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
                     {
-                        MoveInput.RepeatTimes++;
-                        SelGrid.SelCo += new Vector2(0, -MoveInput.Dir.y);
-                        GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().Axis = !GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().Axis;
-                        if (SelGrid.SelCo.x < SelGrid.MinCo.x) { SelGrid.SelCo.x = SelGrid.MinCo.x; }; if (SelGrid.SelCo.y < SelGrid.MinCo.y) { SelGrid.SelCo.y = SelGrid.MinCo.y; };
-                        if (SelGrid.SelCo.x > SelGrid.MaxCo.x) { SelGrid.SelCo.x = SelGrid.MaxCo.x; }; if (SelGrid.SelCo.y > SelGrid.MaxCo.y) { SelGrid.SelCo.y = SelGrid.MaxCo.y; };
+                        if (SelGrid.ControlState == 0) { MoveInput.RepeatTimes++; }
+                        SelGrid.SelCo = Move(SelGrid.SelCo, 0, Dir.y);
                     }
                 }
                 else
                 {
                     if (MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
                     {
-                        MoveInput.RepeatTimes++;
+                        if (SelGrid.ControlState == 0) { MoveInput.RepeatTimes++; }
                     }
                 }
             }
         }
     }
 
-    
+
     public void Movement(InputAction.CallbackContext context) 
     {
         SelGrid.ControlState = 0;
-        MoveInput.Dir = context.ReadValue<Vector2>();
+        MoveInput.Dir.x = (int)context.ReadValue<Vector2>().x; MoveInput.Dir.y = (int)context.ReadValue<Vector2>().y;
     }
 
     public void AttemptEditGrid(HoldInput hi)
@@ -188,12 +263,12 @@ public class InputScr : MonoBehaviour
             if (hi.HoldTimer > 0 && hi.RepeatTimes == 0)
             {
                 hi.RepeatTimes++;
-                GridScript.Edit(hi);
+                GridScript.AttemptEdit(hi);
             }
             else
             {
                 hi.RepeatTimes++;
-                GridScript.Edit(hi);
+                GridScript.AttemptEdit(hi);
             }
         }
         else if (SelGrid.ControlState == 1 && hi.ButtonState == 1)
@@ -202,7 +277,7 @@ public class InputScr : MonoBehaviour
             if (GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().PointedAt && hi.HoldTimer > 0)
             {
                 hi.RepeatTimes++;
-                GridScript.Edit(hi);
+                GridScript.AttemptEdit(hi);
             }
         }
     }
@@ -242,7 +317,6 @@ public class InputScr : MonoBehaviour
             for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
             {
                 GridScript.GridArr[x, Y].CellCla.Cell.GetComponent<CellScr>().ShowSolution ^= true;
-                
             }
         }
     }

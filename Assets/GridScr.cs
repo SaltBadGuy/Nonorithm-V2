@@ -84,7 +84,7 @@ public class GridScr : MonoBehaviour
         }
 
         GridArr = new GridClass[Grid.GetLength(0) + 1, Grid.GetLength(1) + 1];
-        InputScript.SelGrid.MaxCo = new Vector2 (GridArr.GetLength(0) - 1, GridArr.GetLength(1) - 1);
+        InputScript.SelGrid.MaxCo = new Vector2Int(GridArr.GetLength(0) - 1, GridArr.GetLength(1) - 1);
 
         //Initialising 0 indices for clues 
         for (int X = 1; X < GridArr.GetLength(0); X++)
@@ -124,7 +124,7 @@ public class GridScr : MonoBehaviour
                 //We need to add 1 to X and Y to account for GridArr being 1-based.
                 GridArr[X, Y].CellCla.CorrectState = Grid[X-1, Y-1];
                 GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().CorrectCellState = Grid[X - 1, Y  - 1];
-                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().GridCo = new Vector2 (X,Y);
+                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().GridCo = new Vector2Int(X,Y);
 
                 //We generate clues by tracking how many active blocks (1s) are together. This defaults to 0. If the block length is more than 1 and the cell is 0, this ends the particular clue and moves forward in the list.
 
@@ -192,6 +192,49 @@ public class GridScr : MonoBehaviour
 
     }
 
+    public void HowManyCellsToEdit(InputScr.HoldInput hi)
+    {
+        if (InputScript.SelGrid.ButtonHeld)
+        {
+            if (CheckVectorLengthAbs(InputScript.SelGrid.HeldCo, InputScript.SelGrid.SelCo).x >= 1)
+            {
+                for (int i = Mathf.Min(InputScript.SelGrid.HeldCo.x, InputScript.SelGrid.SelCo.x); i <= Mathf.Max(InputScript.SelGrid.HeldCo.x, InputScript.SelGrid.SelCo.x); i++)
+                {
+                    if (hi.InitialCellState != hi.SendState)
+                    {
+                        if (GridArr[i, InputScript.SelGrid.SelCo.y].CellCla.State != 0 && GridArr[i, InputScript.SelGrid.SelCo.y].CellCla.State != 1)
+                        {
+                            Edit(new Vector2Int(i, InputScript.SelGrid.SelCo.y), hi);
+                        }
+                    }
+                    else if (GridArr[i, InputScript.SelGrid.SelCo.y].CellCla.State == hi.InitialCellState)
+                    {
+                            Edit(new Vector2Int(i, InputScript.SelGrid.SelCo.y), hi, 2);
+                    }
+
+                }
+            }
+            else if (CheckVectorLengthAbs(InputScript.SelGrid.HeldCo, InputScript.SelGrid.SelCo).y >= 1)
+            {
+                for (int i = Mathf.Min(InputScript.SelGrid.HeldCo.y, InputScript.SelGrid.SelCo.y); i <= Mathf.Max(InputScript.SelGrid.HeldCo.y, InputScript.SelGrid.SelCo.y); i++)
+                {
+                    if (hi.InitialCellState != hi.SendState)
+                    {
+                        if (GridArr[InputScript.SelGrid.SelCo.x, i].CellCla.State != 0 && GridArr[InputScript.SelGrid.SelCo.x, i].CellCla.State != 1)
+                        {
+                            Edit(new Vector2Int(InputScript.SelGrid.SelCo.x, i), hi);
+                        }
+                    }
+                    else if (GridArr[InputScript.SelGrid.SelCo.x, i].CellCla.State == hi.InitialCellState)
+                    {
+                            Edit(new Vector2Int(InputScript.SelGrid.SelCo.x, i), hi, 2);
+                    }
+                }
+            }
+        }
+        
+    }
+
     /*
      * STATES:
      * 0 - Empty (marked empty by player for State, definitely empty for CorrectState)
@@ -199,42 +242,50 @@ public class GridScr : MonoBehaviour
      * 2 - Blank (initialized state, not been clicked on yet etc., only for State)
      * 3 - Mark (is purely visual, makes it easier for players to count cells etc., only for State)
      */
-    public void Edit(InputScr.HoldInput hi)
+
+    public void AttemptEdit(InputScr.HoldInput hi)
     {
-        //If cell already edited to the same state, makes the cell blank. This also notes what cell was changed to account for hold interactions.
+        //If cell is already the same state as it to be edited to, makes the cell blank. This also notes what cell was changed to account for hold interactions.
         if (hi.RepeatTimes == 1)
         {
-            if (GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State != hi.SendState)
+            if (GridArr[InputScript.SelGrid.SelCo.x, InputScript.SelGrid.SelCo.y].CellCla.State != hi.SendState)
             {
-                hi.InitialCellState = GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State;
-                GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State = hi.SendState; GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().CellState = hi.SendState;
+                hi.InitialCellState = GridArr[InputScript.SelGrid.SelCo.x, InputScript.SelGrid.SelCo.y].CellCla.State;
+                Edit(InputScript.SelGrid.SelCo, hi);
             }
             else
             {
-                hi.InitialCellState = GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State;
-                GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State = 2; GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().CellState = 2;
+                hi.InitialCellState = GridArr[InputScript.SelGrid.SelCo.x, InputScript.SelGrid.SelCo.y].CellCla.State;
+                Edit(InputScript.SelGrid.SelCo, hi, 2);
             }
         }
         /* 
-         * If the button has been held down, it will only change marked or blank cells. 
+         * If the button has been held down, it will only change marked or blank cells. T
          * The game remembers if the initial cell was undone (ie. a fill action was made on a filled cell, making it blank). If so, it will continue this behaviour and leave cells of any other state unaffected.
+         * As an held button may allow players to skip over cells, we check if we need to edit multiple cells at once.
         */
         else
         {
-            if (hi.InitialCellState != hi.SendState)
-            {
-                if (GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State != 0 && GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State != 1)
-                {
-                    GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State = hi.SendState; GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().CellState = hi.SendState;
-                }
-            }
-            else
-            {
-                if (GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State == hi.InitialCellState)
-                {
-                    GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.State = 2; GridArr[(int)InputScript.SelGrid.SelCo.x, (int)InputScript.SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().CellState = 2;
-                }
-            }
+            HowManyCellsToEdit(hi);
         }
     }
+
+    void Edit(Vector2Int cell, InputScr.HoldInput hi, int state = -1)
+    {
+        if (state == -1)
+        {
+            state = hi.SendState;
+        }
+        else
+        {
+            state = 2;
+        }
+        GridArr[cell.x, cell.y].CellCla.State = state; GridArr[cell.x, cell.y].CellCla.Cell.GetComponent<CellScr>().CellState = state;
+    }
+
+    Vector2Int CheckVectorLengthAbs(Vector2Int a, Vector2Int b)
+    {
+        return new Vector2Int(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
+    }
+
 }

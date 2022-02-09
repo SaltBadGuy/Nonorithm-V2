@@ -27,7 +27,7 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public int AxisState = 0;
     public bool Axis = false;
 
-    public Vector2 GridCo;
+    public Vector2Int GridCo;
 
     public Animator Anim;
 
@@ -134,8 +134,37 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
         InputScript.SelGrid.ControlState = 1;
-        InputScript.SelGrid.SelCo = GridCo;
-        PointedAt = true;            
+        PointedAt = true;
+        InputScript.AttemptRawMovement(CheckVectorLength(GridCo, InputScript.SelGrid.RawCo));
+        InputScript.AttemptSelMovement(CheckVectorLength(GridCo, InputScript.SelGrid.SelCo));
+        
+        /*InputScript.SelGrid.RawCo = GridCo;
+        if (!InputScript.SelGrid.ButtonHeld)
+        {
+            InputScript.SelGrid.SelCo = GridCo;
+        }
+        else
+        {
+            if (GridCo == InputScript.SelGrid.HeldCo)
+            {
+                InputScript.SelGrid.SelCo = GridCo;
+            }
+            else if (CheckVectorLength(GridCo, InputScript.SelGrid.HeldCo).x > 0 ^ CheckVectorLength(GridCo, InputScript.SelGrid.HeldCo).y > 0)
+            {
+                InputScript.SelGrid.SelCo = GridCo;
+            }
+            else 
+            {
+                if (CheckVectorLength(InputScript.SelGrid.HeldCo, InputScript.SelGrid.SelCo).x > 1){
+                        InputScript.SelGrid.SelCo.x = GridCo.x;
+                }
+                else if (CheckVectorLength(InputScript.SelGrid.HeldCo, InputScript.SelGrid.SelCo).y > 1)
+                {
+                    InputScript.SelGrid.SelCo.y = GridCo.y;
+                }
+            }
+        }*/
+          
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
@@ -144,4 +173,20 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         PointedAt = false;
     }
 
+    Vector2Int CheckVectorLengthAbs(Vector2Int a, Vector2Int b)
+    {
+        Vector2Int Diff = new Vector2Int(0, 0);
+        Diff.x = Mathf.Abs(a.x - b.x);
+        Diff.y = Mathf.Abs(a.y - b.y);
+        return Diff;
+    }
+
+    Vector2Int CheckVectorLength(Vector2Int a, Vector2Int b)
+    {
+        Vector2Int Diff = new Vector2Int(0, 0);
+        Diff.x = a.x - b.x;
+        Diff.y = a.y - b.y;
+        Debug.Log(Diff);
+        return Diff;
+    }
 }

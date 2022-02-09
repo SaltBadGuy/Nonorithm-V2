@@ -766,6 +766,67 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 878056883550846804, guid: 69b6ba167db605647b31e46e96b8b17b, type: 3}
   m_PrefabInstance: {fileID: 2144631271}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2021574966825413615
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_RootOrder
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144174, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144209, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_Name
+      value: RawSelectIndi
+      objectReference: {fileID: 0}
+    - target: {fileID: 2021574967220144209, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
 --- !u!1001 &2708276787951813761
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -859,7 +920,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 878056883550846811, guid: 69b6ba167db605647b31e46e96b8b17b, type: 3}
       propertyPath: m_Name
-      value: Clue (1)
+      value: Vertical Clue Template
       objectReference: {fileID: 0}
     - target: {fileID: 878056883550846811, guid: 69b6ba167db605647b31e46e96b8b17b, type: 3}
       propertyPath: m_IsActive
@@ -943,6 +1004,26 @@ PrefabInstance:
       propertyPath: GridScript
       value: 
       objectReference: {fileID: 1881972672}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: FillInput.Hori
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: FillInput.Vert
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: MoveInput.Hori
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: MoveInput.Vert
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: RawSelectIndiPre
+      value: 
+      objectReference: {fileID: 2021574967220144209, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
     - target: {fileID: 5412761597368158456, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: m_RootOrder
       value: 7
