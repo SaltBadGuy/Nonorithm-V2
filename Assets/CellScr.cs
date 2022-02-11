@@ -123,11 +123,20 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             Anim.SetLayerWeight(0, 0f);
             Anim.SetLayerWeight(1, 1f);
+            if (CellState == 0 || CellState == 1)
+            {
+                if (CellState == CorrectCellState) { GetComponent<SpriteRenderer>().color = Color.green; } else { GetComponent<SpriteRenderer>().color = Color.red; }
+            }
+            else
+            {
+                if (CorrectCellState == 0) { GetComponent<SpriteRenderer>().color = Color.green; } else { GetComponent<SpriteRenderer>().color = Color.red; }
+            }
         }
-        else
+        else 
         {
             Anim.SetLayerWeight(0, 1f);
             Anim.SetLayerWeight(1, 0f);
+            GetComponent<SpriteRenderer>().color = Color.white;
         }             
     }
 
@@ -136,35 +145,7 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         InputScript.SelGrid.ControlState = 1;
         PointedAt = true;
         InputScript.AttemptRawMovement(CheckVectorLength(GridCo, InputScript.SelGrid.RawCo));
-        InputScript.AttemptSelMovement(CheckVectorLength(GridCo, InputScript.SelGrid.SelCo));
-        
-        /*InputScript.SelGrid.RawCo = GridCo;
-        if (!InputScript.SelGrid.ButtonHeld)
-        {
-            InputScript.SelGrid.SelCo = GridCo;
-        }
-        else
-        {
-            if (GridCo == InputScript.SelGrid.HeldCo)
-            {
-                InputScript.SelGrid.SelCo = GridCo;
-            }
-            else if (CheckVectorLength(GridCo, InputScript.SelGrid.HeldCo).x > 0 ^ CheckVectorLength(GridCo, InputScript.SelGrid.HeldCo).y > 0)
-            {
-                InputScript.SelGrid.SelCo = GridCo;
-            }
-            else 
-            {
-                if (CheckVectorLength(InputScript.SelGrid.HeldCo, InputScript.SelGrid.SelCo).x > 1){
-                        InputScript.SelGrid.SelCo.x = GridCo.x;
-                }
-                else if (CheckVectorLength(InputScript.SelGrid.HeldCo, InputScript.SelGrid.SelCo).y > 1)
-                {
-                    InputScript.SelGrid.SelCo.y = GridCo.y;
-                }
-            }
-        }*/
-          
+        InputScript.AttemptSelMovement(CheckVectorLength(GridCo, InputScript.SelGrid.SelCo));        
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
@@ -186,7 +167,6 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         Vector2Int Diff = new Vector2Int(0, 0);
         Diff.x = a.x - b.x;
         Diff.y = a.y - b.y;
-        Debug.Log(Diff);
         return Diff;
     }
 }

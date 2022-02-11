@@ -642,6 +642,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 69b6ba167db605647b31e46e96b8b17b, type: 3}
+--- !u!1 &1169785541 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2021574967220144209, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+  m_PrefabInstance: {fileID: 2021574966825413615}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1881972672 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8219283216053786076, guid: 22f751dd8f838b446a4e963d5794d887, type: 3}
@@ -1005,25 +1010,45 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1881972672}
     - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: SelectIndiPre
+      value: 
+      objectReference: {fileID: 3615869632581372996, guid: f9fab58723a356e4b9a7ebe03d6b3387, type: 3}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: FillInput.Hori
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: FillInput.Vert
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: MoveInput.Hori
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: MoveInput.Vert
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: RawSelectIndiPre
       value: 
-      objectReference: {fileID: 2021574967220144209, guid: d57c1586d4ed22247a5fcbbfc2b40f5e, type: 3}
+      objectReference: {fileID: 1169785541}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: FillInput.HoldInterval
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: MarkInput.HoldInterval
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: MoveInput.HoldInterval
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 2085540966, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
+      propertyPath: EmptyInput.HoldInterval
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 5412761597368158456, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: m_RootOrder
       value: 7
@@ -1446,7 +1471,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5412761597368158457, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: m_ActionEvents.Array.data[20].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnGenerateGrid
+      value: GenerateGrid
       objectReference: {fileID: 0}
     - target: {fileID: 5412761597368158457, guid: a5681112477d4ce4c9ee6e96b0071d95, type: 3}
       propertyPath: m_ActionEvents.Array.data[21].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName

@@ -27,6 +27,7 @@ public class InputScr : MonoBehaviour
     /*
      * Dir is used purely for movement of the selected cell by dpad etc.
      * HoldTimer tracks how long the button has been held down for. Actions such as filling, emptying or marking only care about the hold interval (for locking on an axis) whereas movement also cares about the repeat interval.
+     * (The Hold Timer for MoveInput is effectively skipped if movement occurs while a fill/empty/mark button is held down, meaning that the axis is immediately locked.
      * The InitialCellState tracks what state the cell was on before being changing by filling etc.
      *
      * Button States:
@@ -45,7 +46,7 @@ public class InputScr : MonoBehaviour
     {
         public Vector2Int Dir;
         public int HoldTimer = 0;
-        public int HoldInterval = 50;
+        public int HoldInterval = 100;
         public int RepeatInterval = 50;
         public int RepeatTimes = 0;
         public int InitialCellState = 2;
@@ -105,10 +106,11 @@ public class InputScr : MonoBehaviour
         CheckGenericHolds();
         AttemptRawMovement(MoveInput.Dir);
         AttemptSelMovement(MoveInput.Dir);
+        CheckAxis();
         AttemptEditGrid(EmptyInput);
         AttemptEditGrid(FillInput);
         AttemptEditGrid(MarkInput);
-        CheckAxis();
+
     }
 
     void CheckAxis()
@@ -149,31 +151,36 @@ public class InputScr : MonoBehaviour
         if (EmptyInput.HoldTimer > EmptyInput.HoldInterval || FillInput.HoldTimer > FillInput.HoldInterval || MarkInput.HoldTimer > MarkInput.HoldInterval) {
             if (!SelGrid.ButtonHeld) 
             { 
-                SelGrid.HeldCo = SelGrid.SelCo; 
-            }  
-            SelGrid.ButtonHeld = true; 
+                SelGrid.HeldCo = SelGrid.SelCo;
+                SelGrid.ButtonHeld = true;
+            }            
         } 
         else { SelGrid.ButtonHeld = false; MoveInput.Hori = true; MoveInput.Vert = true; SelGrid.SelCo = SelGrid.RawCo; }
     }
 
     public Vector2Int Move(Vector2Int co, int x, int y)
     {
-
-        co += new Vector2Int(x, y);
-        if (co.x < SelGrid.MinCo.x) { co.x = SelGrid.MinCo.x; }; if (co.y < SelGrid.MinCo.y) { co.y = SelGrid.MinCo.y; };
-        if (co.x > SelGrid.MaxCo.x) { co.x = SelGrid.MaxCo.x; }; if (co.y > SelGrid.MaxCo.y) { co.y = SelGrid.MaxCo.y; };
-        return co;
-    }
-
-    public void AttemptRawMovement(Vector2Int Dir)
-    {
-        //We flip the y coordinate if coming in using keyboard (moving down on the grid makes the y coordinate go up on the relevant cell, but down on keyboard is a (0, -1) vector)
-        if (SelGrid.ControlState == 0) { Dir.y = -MoveInput.Dir.y; }
-
-        if (SelGrid.ControlState == 1 || MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
+        if ((FillInput.ButtonState == 1 || EmptyInput.ButtonState == 1 || MarkInput.ButtonState == 1) && !SelGrid.ButtonHeld)
         {
-            SelGrid.RawCo = Move(SelGrid.RawCo, Dir.x, Dir.y);
+            FillInput.HoldTimer = FillInput.HoldInterval;
+            EmptyInput.HoldTimer = EmptyInput.HoldInterval;
+            MarkInput.HoldTimer = MarkInput.HoldInterval;
+            SelGrid.ButtonHeld = true;
+            SelGrid.HeldCo = SelGrid.SelCo;
         }
+        co += new Vector2Int(x, y);
+        //We allow the cursor to wrap around the screen for d-pad players, but only if the button isn't held.
+        if (SelGrid.ControlState == 0 && !SelGrid.ButtonHeld)
+        {
+            if (co.x < SelGrid.MinCo.x) { co.x = SelGrid.MaxCo.x; }; if (co.y < SelGrid.MinCo.y) { co.y = SelGrid.MaxCo.y; };
+            if (co.x > SelGrid.MaxCo.x) { co.x = SelGrid.MinCo.x; }; if (co.y > SelGrid.MaxCo.y) { co.y = SelGrid.MinCo.y; };
+        }
+        else
+        {
+            if (co.x < SelGrid.MinCo.x) { co.x = SelGrid.MinCo.x; }; if (co.y < SelGrid.MinCo.y) { co.y = SelGrid.MinCo.y; };
+            if (co.x > SelGrid.MaxCo.x) { co.x = SelGrid.MaxCo.x; }; if (co.y > SelGrid.MaxCo.y) { co.y = SelGrid.MaxCo.y; };
+        }
+        return co;
     }
 
     public void LockAxis(Vector2Int Dir)
@@ -186,6 +193,17 @@ public class InputScr : MonoBehaviour
         else
         {
             MoveInput.Hori = false;
+        }
+    }
+
+    public void AttemptRawMovement(Vector2Int Dir)
+    {
+        //We flip the y coordinate if coming in using keyboard (moving down on the grid makes the y coordinate go up on the relevant cell, but down on keyboard is a (0, -1) vector)
+        if (SelGrid.ControlState == 0) { Dir.y = -MoveInput.Dir.y; }
+
+        if (SelGrid.ControlState == 1 || MoveInput.HoldTimer > MoveInput.HoldInterval * Mathf.Clamp01(MoveInput.RepeatTimes) + MoveInput.RepeatInterval * MoveInput.RepeatTimes)
+        {
+            SelGrid.RawCo = Move(SelGrid.RawCo, Dir.x, Dir.y);
         }
     }
 
@@ -260,25 +278,18 @@ public class InputScr : MonoBehaviour
     {
         if (SelGrid.ControlState == 0 && hi.ButtonState == 1)
         {
-            if (hi.HoldTimer > 0 && hi.RepeatTimes == 0)
-            {
-                hi.RepeatTimes++;
-                GridScript.AttemptEdit(hi);
-            }
-            else
-            {
-                hi.RepeatTimes++;
-                GridScript.AttemptEdit(hi);
-            }
+            hi.RepeatTimes++;
+            GridScript.AttemptEdit(hi);
         }
         else if (SelGrid.ControlState == 1 && hi.ButtonState == 1)
         {
             //We check if the mouse is actually on a cell before continuing (ie. we don't want a click to fill the last chosen cell if the pointer isn't on the grid at all)
-            if (GridScript.GridArr[(int)SelGrid.SelCo.x, (int)SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().PointedAt && hi.HoldTimer > 0)
+            //This isn't checked if the axis has been locked as we wish to allow players to not necessarily be on the cell, as long as it's parallel.
+            if (SelGrid.ButtonHeld || GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().PointedAt)
             {
                 hi.RepeatTimes++;
                 GridScript.AttemptEdit(hi);
-            }
+            }      
         }
     }
 
@@ -312,35 +323,44 @@ public class InputScr : MonoBehaviour
 
     public void ShowSolution(InputAction.CallbackContext context)
     {
-        for (int x = 1; x < GridScript.GridArr.GetLength(0); x++)
+        if (context.started)
         {
-            for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+            for (int x = 1; x < GridScript.GridArr.GetLength(0); x++)
             {
-                GridScript.GridArr[x, Y].CellCla.Cell.GetComponent<CellScr>().ShowSolution ^= true;
+                for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+                {
+                    GridScript.GridArr[x, Y].CellCla.Cell.GetComponent<CellScr>().ShowSolution ^= true;
+                }
             }
         }
     }
 
     public void ClearAll(InputAction.CallbackContext context)
     {
-        for (int x = 1; x < GridScript.GridArr.GetLength(0); x++)
+        if (context.started)
         {
-            for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+            for (int X = 1; X < GridScript.GridArr.GetLength(0); X++)
             {
-                GridScript.GridArr[x, Y].CellCla.Cell.GetComponent<CellScr>().CellState = 2;
+                for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+                {
+                    GridScript.Edit(new Vector2Int(X, Y), 2);
+                }
             }
         }
     }
 
     public void ClearMarks(InputAction.CallbackContext context)
     {
-        for (int x = 1; x < GridScript.GridArr.GetLength(0); x++)
+        if (context.started)
         {
-            for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+            for (int X = 1; X < GridScript.GridArr.GetLength(0); X++)
             {
-                if(GridScript.GridArr[x, Y].CellCla.Cell.GetComponent<CellScr>().CellState == 3)
+                for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
                 {
-                    GridScript.GridArr[x, Y].CellCla.Cell.GetComponent<CellScr>().CellState = 2;
+                    if (GridScript.GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().CellState == 3)
+                    {
+                        GridScript.Edit(new Vector2Int(X,Y), 2);
+                    }
                 }
             }
         }
@@ -348,7 +368,10 @@ public class InputScr : MonoBehaviour
 
     public void GenerateGrid(InputAction.CallbackContext context)
     {
-        int[,] RanGrid = GridScript.RandomGridGen(GridScript.GridArr.GetLength(0) - 1, GridScript.GridArr.GetLength(1) - 1);
-        GridScript.GridGenFromSol(RanGrid);
+        if (context.started)
+        {
+            int[,] RanGrid = GridScript.RandomGridGen(GridScript.GridArr.GetLength(0) - 1, GridScript.GridArr.GetLength(1) - 1);
+            GridScript.GridGenFromSol(RanGrid);
+        }
     }
 }

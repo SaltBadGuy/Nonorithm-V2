@@ -204,12 +204,12 @@ public class GridScr : MonoBehaviour
                     {
                         if (GridArr[i, InputScript.SelGrid.SelCo.y].CellCla.State != 0 && GridArr[i, InputScript.SelGrid.SelCo.y].CellCla.State != 1)
                         {
-                            Edit(new Vector2Int(i, InputScript.SelGrid.SelCo.y), hi);
+                            Edit(new Vector2Int(i, InputScript.SelGrid.SelCo.y), hi.SendState);
                         }
                     }
                     else if (GridArr[i, InputScript.SelGrid.SelCo.y].CellCla.State == hi.InitialCellState)
                     {
-                            Edit(new Vector2Int(i, InputScript.SelGrid.SelCo.y), hi, 2);
+                            Edit(new Vector2Int(i, InputScript.SelGrid.SelCo.y), hi.SendState, 2);
                     }
 
                 }
@@ -222,12 +222,12 @@ public class GridScr : MonoBehaviour
                     {
                         if (GridArr[InputScript.SelGrid.SelCo.x, i].CellCla.State != 0 && GridArr[InputScript.SelGrid.SelCo.x, i].CellCla.State != 1)
                         {
-                            Edit(new Vector2Int(InputScript.SelGrid.SelCo.x, i), hi);
+                            Edit(new Vector2Int(InputScript.SelGrid.SelCo.x, i), hi.SendState);
                         }
                     }
                     else if (GridArr[InputScript.SelGrid.SelCo.x, i].CellCla.State == hi.InitialCellState)
                     {
-                            Edit(new Vector2Int(InputScript.SelGrid.SelCo.x, i), hi, 2);
+                            Edit(new Vector2Int(InputScript.SelGrid.SelCo.x, i), hi.SendState, 2);
                     }
                 }
             }
@@ -251,16 +251,16 @@ public class GridScr : MonoBehaviour
             if (GridArr[InputScript.SelGrid.SelCo.x, InputScript.SelGrid.SelCo.y].CellCla.State != hi.SendState)
             {
                 hi.InitialCellState = GridArr[InputScript.SelGrid.SelCo.x, InputScript.SelGrid.SelCo.y].CellCla.State;
-                Edit(InputScript.SelGrid.SelCo, hi);
+                Edit(InputScript.SelGrid.SelCo, hi.SendState);
             }
             else
             {
                 hi.InitialCellState = GridArr[InputScript.SelGrid.SelCo.x, InputScript.SelGrid.SelCo.y].CellCla.State;
-                Edit(InputScript.SelGrid.SelCo, hi, 2);
+                Edit(InputScript.SelGrid.SelCo, hi.SendState, 2);
             }
         }
         /* 
-         * If the button has been held down, it will only change marked or blank cells. T
+         * If the button has been held down, it will only change marked or blank cells.
          * The game remembers if the initial cell was undone (ie. a fill action was made on a filled cell, making it blank). If so, it will continue this behaviour and leave cells of any other state unaffected.
          * As an held button may allow players to skip over cells, we check if we need to edit multiple cells at once.
         */
@@ -270,11 +270,11 @@ public class GridScr : MonoBehaviour
         }
     }
 
-    void Edit(Vector2Int cell, InputScr.HoldInput hi, int state = -1)
+    public void Edit(Vector2Int cell, int sendstate, int state = -1)
     {
         if (state == -1)
         {
-            state = hi.SendState;
+            state = sendstate;
         }
         else
         {
