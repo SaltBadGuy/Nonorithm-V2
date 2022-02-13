@@ -87,7 +87,7 @@ public class InputScr : MonoBehaviour
     {
         if (GridScript.GridArr[1,1].CellCla != null && SelGrid.ControlState != 2)
         {
-            SelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Cell.transform.position.x, GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Cell.transform.position.y, -2);
+            SelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.GameObj.transform.position.x, GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.GameObj.transform.position.y, -2);
         }
         else
         {
@@ -96,7 +96,7 @@ public class InputScr : MonoBehaviour
 
         if (GridScript.GridArr[1, 1].CellCla != null && SelGrid.ControlState != 2)
         {
-            RawSelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.Cell.transform.position.x, GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.Cell.transform.position.y, -1);
+            RawSelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.GameObj.transform.position.x, GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.GameObj.transform.position.y, -1);
         }
         else
         {
@@ -119,7 +119,7 @@ public class InputScr : MonoBehaviour
         {
             for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
             {
-                GridScript.GridArr[X,Y].CellCla.Cell.GetComponent<CellScr>().Axis = false ;
+                GridScript.GridArr[X,Y].CellCla.Script.Axis = false ;
             }
         }
         if (SelGrid.ButtonHeld)
@@ -129,14 +129,14 @@ public class InputScr : MonoBehaviour
 
                 for (int i = Mathf.Min((int)SelGrid.SelCo.y, (int)SelGrid.HeldCo.y); i <= Mathf.Max((int)SelGrid.SelCo.y, (int)SelGrid.HeldCo.y); i++)
                 {
-                    GridScript.GridArr[(int)SelGrid.HeldCo.x, i].CellCla.Cell.GetComponent<CellScr>().Axis = true;
+                    GridScript.GridArr[(int)SelGrid.HeldCo.x, i].CellCla.Script.Axis = true;
                 }
             }
             else
             {
                 for (int i = Mathf.Min((int)SelGrid.SelCo.x, (int)SelGrid.HeldCo.x); i <= Mathf.Max((int)SelGrid.SelCo.x, (int)SelGrid.HeldCo.x); i++)
                 {
-                    GridScript.GridArr[i, (int)SelGrid.HeldCo.y].CellCla.Cell.GetComponent<CellScr>().Axis = true;
+                    GridScript.GridArr[i, (int)SelGrid.HeldCo.y].CellCla.Script.Axis = true;
                 }
             }
         }
@@ -285,7 +285,7 @@ public class InputScr : MonoBehaviour
         {
             //We check if the mouse is actually on a cell before continuing (ie. we don't want a click to fill the last chosen cell if the pointer isn't on the grid at all)
             //This isn't checked if the axis has been locked as we wish to allow players to not necessarily be on the cell, as long as it's parallel.
-            if (SelGrid.ButtonHeld || GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Cell.GetComponent<CellScr>().PointedAt)
+            if (SelGrid.ButtonHeld || GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Script.PointedAt)
             {
                 hi.RepeatTimes++;
                 GridScript.AttemptEdit(hi);
@@ -329,7 +329,7 @@ public class InputScr : MonoBehaviour
             {
                 for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
                 {
-                    GridScript.GridArr[x, Y].CellCla.Cell.GetComponent<CellScr>().ShowSolution ^= true;
+                    GridScript.GridArr[x, Y].CellCla.Script.ShowSolution ^= true;
                 }
             }
         }
@@ -357,7 +357,7 @@ public class InputScr : MonoBehaviour
             {
                 for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
                 {
-                    if (GridScript.GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().CellState == 3)
+                    if (GridScript.GridArr[X, Y].CellCla.Script.CellState == 3)
                     {
                         GridScript.Edit(new Vector2Int(X,Y), 2);
                     }
@@ -372,6 +372,22 @@ public class InputScr : MonoBehaviour
         {
             int[,] RanGrid = GridScript.RandomGridGen(GridScript.GridArr.GetLength(0) - 1, GridScript.GridArr.GetLength(1) - 1);
             GridScript.GridGenFromSol(RanGrid);
+        }
+    }
+
+    public void Undo(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            GridScript.UndoRedoGrid(true);
+        }
+    }
+
+    public void Redo(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            GridScript.UndoRedoGrid(false);
         }
     }
 }

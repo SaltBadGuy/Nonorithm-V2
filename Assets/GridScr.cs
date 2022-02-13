@@ -3,27 +3,36 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using TMPro;
+using System;
 
 public class GridScr : MonoBehaviour
 {
     //Custom classes. The Gridclass is where the entirety of the boardstate and clues are stored.
-
-    public class CellClass {
-        public GameObject Cell { get; set; }
-        public int State { get; set; }
-        public int CorrectState { get; set; }
+    
+    [Serializable]
+    public class CellClass 
+    {
+        public GameObject GameObj;
+        public CellScr Script;
+        public int State;
+        public int CorrectState;
     }
 
+    [Serializable]
     public class ClueClass
     {
-        public int BlockLength { get; set; }
-        public bool Marked { get; set; }
+        public int BlockLength;
+        public bool Marked;
     }
 
+    [Serializable]
     public class GridClass
     {
-        public List<ClueClass> ClueCla { get; set; }
-        public CellClass CellCla { get; set; }
+        public List<ClueClass> ClueCla;
+        public CellClass CellCla;
+        public List<int[,]> GridHistory;
+        public int[,] CurrentState;
+        
     }
 
     //Prefabs and some misc stats
@@ -33,8 +42,9 @@ public class GridScr : MonoBehaviour
     public float CellSize;
 
     public InputScr InputScript;
-
     public GridClass[,] GridArr;
+    public int HistoryPointer = -1;
+    public bool EditedThisFrame = false;
 
     public int[,] TestGrid = new int[5, 7] 
     {
@@ -49,7 +59,6 @@ public class GridScr : MonoBehaviour
     void Start()
     {
         CellSize = CellPre.GetComponent<SpriteRenderer>().bounds.size.x;
-        //InputScript = gameObject.GetComponent<InputScr>();
         TestGrid = RandomGridGen(10, 10);
         GridGenFromSol(TestGrid);
     }
@@ -61,7 +70,7 @@ public class GridScr : MonoBehaviour
         {
             for (int Y = 0; Y < gHeight; Y++)
             {
-                RanGrid[X, Y] = (int)Mathf.Round(Random.value);
+                RanGrid[X, Y] = (int)Mathf.Round(UnityEngine.Random.value);
             }
         }
 
@@ -71,7 +80,16 @@ public class GridScr : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        EditedThisFrame = false;
+
+    }
+
+    private void LateUpdate()
+    {
+        if (EditedThisFrame)
+        {
+            SaveGridState();
+        }
     }
 
     //This generates a grid from a 2D array of integers referencing a Solution for a picross board
@@ -80,10 +98,15 @@ public class GridScr : MonoBehaviour
 
         foreach (Transform childObj in gameObject.transform)
         {
-            GameObject.Destroy(childObj.gameObject);
+            Destroy(childObj.gameObject);
         }
 
         GridArr = new GridClass[Grid.GetLength(0) + 1, Grid.GetLength(1) + 1];
+        GridArr[0, 0] = new GridClass
+        {
+            CurrentState = new int[Grid.GetLength(0) + 1, Grid.GetLength(1) + 1],
+            GridHistory = new List<int[,]>(),
+        };
         InputScript.SelGrid.MaxCo = new Vector2Int(GridArr.GetLength(0) - 1, GridArr.GetLength(1) - 1);
 
         //Initialising 0 indices for clues 
@@ -118,13 +141,14 @@ public class GridScr : MonoBehaviour
                 };
 
                 //We now generate the cells and set states. We invert the y values so that our top-left square is the first one generated.
-                GridArr[X, Y].CellCla.Cell = Instantiate(CellPre, new Vector3(CellSize * (X - 1), -(CellSize * (Y - 1)), 0), Quaternion.identity, gameObject.transform);
-                GridArr[X, Y].CellCla.Cell.name = "(" + X + ", " + Y + ")";
+                GridArr[X, Y].CellCla.GameObj = Instantiate(CellPre, new Vector3(CellSize * (X - 1), -(CellSize * (Y - 1)), 0), Quaternion.identity, gameObject.transform);
+                GridArr[X, Y].CellCla.Script = GridArr[X, Y].CellCla.GameObj.GetComponent<CellScr>();
+                GridArr[X, Y].CellCla.GameObj.name = "(" + X + ", " + Y + ")";
                 GridArr[X, Y].CellCla.State = 2;
                 //We need to add 1 to X and Y to account for GridArr being 1-based.
                 GridArr[X, Y].CellCla.CorrectState = Grid[X-1, Y-1];
-                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().CorrectCellState = Grid[X - 1, Y  - 1];
-                GridArr[X, Y].CellCla.Cell.GetComponent<CellScr>().GridCo = new Vector2Int(X,Y);
+                GridArr[X, Y].CellCla.Script.CorrectCellState = Grid[X - 1, Y  - 1];
+                GridArr[X, Y].CellCla.Script.GridCo = new Vector2Int(X,Y);
 
                 //We generate clues by tracking how many active blocks (1s) are together. This defaults to 0. If the block length is more than 1 and the cell is 0, this ends the particular clue and moves forward in the list.
 
@@ -145,7 +169,7 @@ public class GridScr : MonoBehaviour
                     }
                 }
             }
-        }        
+        }
 
         //We now generate a string to be displayed as clues on the rows and columns
         for (int X = 1; X <= Grid.GetLength(1); X++)
@@ -183,7 +207,9 @@ public class GridScr : MonoBehaviour
             GameObject Clue = Instantiate(CluePre, new Vector3(CellSize * (Y - 1), 0.32f, 0), Quaternion.identity, gameObject.transform);
             Clue.name = "Column " + Y + " Clue";
             Clue.GetComponent<TextMeshPro>().text = ClueList;
-        }        
+        }
+
+        SaveGridState();
     }
     
     //This generates a grid based on clues (THIS ISN'T GUARANTEED TO WORK OR PROVIDE A SOLUTION)
@@ -268,6 +294,7 @@ public class GridScr : MonoBehaviour
         {
             HowManyCellsToEdit(hi);
         }
+
     }
 
     public void Edit(Vector2Int cell, int sendstate, int state = -1)
@@ -280,7 +307,8 @@ public class GridScr : MonoBehaviour
         {
             state = 2;
         }
-        GridArr[cell.x, cell.y].CellCla.State = state; GridArr[cell.x, cell.y].CellCla.Cell.GetComponent<CellScr>().CellState = state;
+        GridArr[cell.x, cell.y].CellCla.State = state; GridArr[cell.x, cell.y].CellCla.Script.CellState = state;
+        EditedThisFrame = true;
     }
 
     Vector2Int CheckVectorLengthAbs(Vector2Int a, Vector2Int b)
@@ -288,4 +316,69 @@ public class GridScr : MonoBehaviour
         return new Vector2Int(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
     }
 
+    public void SaveGridState()
+    {
+        for (int X = 1; X < GridArr.GetLength(0); X++)
+        {
+            for (int Y = 1; Y < GridArr.GetLength(1); Y++)
+            {
+                GridArr[0, 0].CurrentState[X, Y] = GridArr[X, Y].CellCla.State;
+            }
+        }
+        
+        HistoryPointer++;
+        /*
+         *In the case where we are not at the latest grid state(ie.we have done at least 1 undo) we check if this newly saved state is the same as the next state in the list.
+         *If not, we clear the list of saved states after our newly saved state as they'll no longer be compatiable (similar to going backwards and forwards on a browser)
+        */
+        if (HistoryPointer < GridArr[0, 0].GridHistory.Count)
+        {
+            if (!Check2DArrays(GridArr[0, 0].CurrentState, GridArr[0, 0].GridHistory[HistoryPointer]))
+            {
+                Debug.Log("Incompatible gridhistory, deleting");
+                GridArr[0, 0].GridHistory.RemoveRange(HistoryPointer, GridArr[0, 0].GridHistory.Count - HistoryPointer);
+            }
+        }
+
+        GridArr[0, 0].GridHistory.Add(GridArr[0, 0].CurrentState.Clone() as int[,]);
+    }
+
+    public void UndoRedoGrid(bool undo)
+    {
+        if (undo)
+        {
+            if (HistoryPointer > 0) { HistoryPointer--; } else { return; }
+        }
+        else
+        {
+            if (HistoryPointer < GridArr[0,0].GridHistory.Count - 1) { HistoryPointer++; } else { return; }
+        }
+
+        for (int X = 1; X < GridArr.GetLength(0); X++)
+        {
+            for (int Y = 1; Y < GridArr.GetLength(1); Y++)
+            {
+                GridArr[0, 0].CurrentState[X, Y] = GridArr[0, 0].GridHistory[HistoryPointer][X, Y];
+                GridArr[X, Y].CellCla.State = GridArr[0, 0].CurrentState[X, Y];
+                GridArr[X, Y].CellCla.Script.CellState = GridArr[0, 0].CurrentState[X, Y];
+            }
+        }
+    }
+
+    public bool Check2DArrays(int[,] a, int [,] b)
+    {
+        bool same = true;
+        for (int X = 1; X < GridArr.GetLength(0); X++)
+        {
+            for (int Y = 1; Y < GridArr.GetLength(1); Y++)
+            {
+                if (a[X,Y] != b[X,Y])
+                {
+                    same = false;
+                    return same;
+                }
+            }
+        }
+        return same;
+    }
 }
