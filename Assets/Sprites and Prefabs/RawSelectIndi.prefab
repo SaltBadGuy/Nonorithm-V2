@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2021574967220144174}
   - component: {fileID: 2021574967220144175}
   - component: {fileID: 2021574967220144208}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: RawSelectIndi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -1736840564374045135, guid: d1596549e90d22d468a50d03a9ee888d, type: 3}
-  m_Color: {r: 0.44017607, g: 0.46226418, b: 0.4339178, a: 1}
+  m_Color: {r: 0.972549, g: 0.023309382, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

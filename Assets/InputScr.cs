@@ -15,7 +15,7 @@ public class InputScr : MonoBehaviour
     [System.Serializable]
     public class SelectIndice
     {
-        public Vector2Int RawCo = new Vector2Int(1, 1);
+        public Vector2Int RawCo = new Vector2Int(1,1);
         public Vector2Int SelCo = new Vector2Int(1,1); //{ get; set; }
         public Vector2Int HeldCo = new Vector2Int(1,1);
         public Vector2Int MinCo = new Vector2Int(1,1);
@@ -42,11 +42,11 @@ public class InputScr : MonoBehaviour
      */
 
     [System.Serializable]
-    public class HoldInput
+    public class InputHandle
     {
         public Vector2Int Dir;
         public int HoldTimer = 0;
-        public int HoldInterval = 100;
+        public int HoldInterval = 50;
         public int RepeatInterval = 50;
         public int RepeatTimes = 0;
         public int InitialCellState = 2;
@@ -65,10 +65,11 @@ public class InputScr : MonoBehaviour
     GameObject RawSelectIndi;
 
     //This class lets us have behaviour for holding down a button similar to holding down a key in a word processor (ie. you must hold the button down for it for HoldInterval to start repeating the action at RepeatIntervals)
-    public HoldInput MoveInput = new HoldInput { };
-    public HoldInput EmptyInput = new HoldInput { };
-    public HoldInput FillInput = new HoldInput { };
-    public HoldInput MarkInput = new HoldInput { };
+    public InputHandle MoveInput = new InputHandle { };
+    public InputHandle EmptyInput = new InputHandle { };
+    public InputHandle FillInput = new InputHandle { };
+    public InputHandle MarkInput = new InputHandle { };
+    public InputHandle UndoRedoInput = new InputHandle { };
 
 
     // Start is called before the first frame update
@@ -85,21 +86,18 @@ public class InputScr : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GridScript.GridArr[1,1].CellCla != null && SelGrid.ControlState != 2)
+        if (GridScript.GridArr != null)
         {
-            SelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.GameObj.transform.position.x, GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.GameObj.transform.position.y, -2);
+            if (SelGrid.ControlState != 2)
+            {
+                SelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Obj.transform.position.x, GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Obj.transform.position.y, -2);
+                RawSelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.Obj.transform.position.x, GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.Obj.transform.position.y, -1);
+
+            }            
         }
         else
         {
             SelectIndi.transform.position = new Vector3(SelectIndi.transform.position.x, SelectIndi.transform.position.y, 0);
-        }
-
-        if (GridScript.GridArr[1, 1].CellCla != null && SelGrid.ControlState != 2)
-        {
-            RawSelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.GameObj.transform.position.x, GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.GameObj.transform.position.y, -1);
-        }
-        else
-        {
             RawSelectIndi.transform.position = new Vector3(RawSelectIndi.transform.position.x, RawSelectIndi.transform.position.y, 0);
         }
 
@@ -110,7 +108,8 @@ public class InputScr : MonoBehaviour
         AttemptEditGrid(EmptyInput);
         AttemptEditGrid(FillInput);
         AttemptEditGrid(MarkInput);
-
+        AttemptUndoRedo();
+        AttemptHighlight();
     }
 
     void CheckAxis()
@@ -147,7 +146,10 @@ public class InputScr : MonoBehaviour
         if (EmptyInput.ButtonState == 1) { EmptyInput.HoldTimer++; } else if (EmptyInput.ButtonState == 0) { EmptyInput.HoldTimer = 0; EmptyInput.RepeatTimes = 0; ; };
         if (FillInput.ButtonState == 1) { FillInput.HoldTimer++; } else if (FillInput.ButtonState == 0) { FillInput.HoldTimer = 0; FillInput.RepeatTimes = 0; };
         if (MarkInput.ButtonState == 1) { MarkInput.HoldTimer++; } else if (MarkInput.ButtonState == 0) { MarkInput.HoldTimer = 0; MarkInput.RepeatTimes = 0; };
+
+        if (UndoRedoInput.Dir != Vector2Int.zero) { UndoRedoInput.HoldTimer++; } else { UndoRedoInput.HoldTimer = 0; UndoRedoInput.RepeatTimes = 0; }
         if (MoveInput.Dir != Vector2Int.zero) { MoveInput.HoldTimer++; } else { MoveInput.HoldTimer = 0; MoveInput.RepeatTimes = 0; }
+
         if (EmptyInput.HoldTimer > EmptyInput.HoldInterval || FillInput.HoldTimer > FillInput.HoldInterval || MarkInput.HoldTimer > MarkInput.HoldInterval) {
             if (!SelGrid.ButtonHeld) 
             { 
@@ -267,14 +269,7 @@ public class InputScr : MonoBehaviour
         }
     }
 
-
-    public void Movement(InputAction.CallbackContext context) 
-    {
-        SelGrid.ControlState = 0;
-        MoveInput.Dir.x = (int)context.ReadValue<Vector2>().x; MoveInput.Dir.y = (int)context.ReadValue<Vector2>().y;
-    }
-
-    public void AttemptEditGrid(HoldInput hi)
+    public void AttemptEditGrid(InputHandle hi)
     {
         if (SelGrid.ControlState == 0 && hi.ButtonState == 1)
         {
@@ -293,7 +288,15 @@ public class InputScr : MonoBehaviour
         }
     }
 
-    public void GetStateFromInput(HoldInput hi, InputAction.CallbackContext ctx)
+    public void AttemptUndoRedo()
+    {
+        if (UndoRedoInput.HoldTimer > UndoRedoInput.HoldInterval * Mathf.Clamp01(UndoRedoInput.RepeatTimes) + UndoRedoInput.RepeatInterval * UndoRedoInput.RepeatTimes)
+        {
+            GridScript.UndoRedoGrid(UndoRedoInput.Dir.x);
+        }
+    }
+
+    public void GetStateFromInput(InputHandle hi, InputAction.CallbackContext ctx)
     {
         if (ctx.performed) { hi.ButtonState = 1; }
         else if (ctx.canceled) { hi.ButtonState = 0; }
@@ -312,6 +315,17 @@ public class InputScr : MonoBehaviour
     public void Mark(InputAction.CallbackContext context)
     {
         GetStateFromInput(MarkInput, context);
+    }
+
+    public void UndoRedo(InputAction.CallbackContext context)
+    {
+        UndoRedoInput.Dir.x = (int)context.ReadValue<float>();
+    }
+
+    public void Movement(InputAction.CallbackContext context)
+    {
+        SelGrid.ControlState = 0;
+        MoveInput.Dir.x = (int)context.ReadValue<Vector2>().x; MoveInput.Dir.y = (int)context.ReadValue<Vector2>().y;
     }
 
     public void MouseMovement(InputAction.CallbackContext context)
@@ -370,24 +384,15 @@ public class InputScr : MonoBehaviour
     {
         if (context.started)
         {
-            int[,] RanGrid = GridScript.RandomGridGen(GridScript.GridArr.GetLength(0) - 1, GridScript.GridArr.GetLength(1) - 1);
+            int[,] RanGrid = GridScript.RandomGridGen(GridScript.GridHori, GridScript.GridVert);
             GridScript.GridGenFromSol(RanGrid);
         }
     }
 
-    public void Undo(InputAction.CallbackContext context)
+    //LIKELY NOT USED SINCE WILL BE HANDLED BY CLUEOBJ ITSELF
+    void AttemptHighlight()
     {
-        if (context.started)
-        {
-            GridScript.UndoRedoGrid(true);
-        }
-    }
-
-    public void Redo(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            GridScript.UndoRedoGrid(false);
-        }
+        //GridScript.GridArr[SelGrid.SelCo.x, 0].ClueBGSpr.color = Color.yellow;
+        //GridScript.GridArr[SelGrid.SelCo.y, 0].ClueBGSpr.color = Color.yellow;
     }
 }

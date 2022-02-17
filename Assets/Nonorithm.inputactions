@@ -584,17 +584,9 @@
                     "interactions": ""
                 },
                 {
-                    "name": "Undo",
+                    "name": "UndoRedo",
                     "type": "Button",
                     "id": "5b9d75af-0a60-41b3-b8c4-b229be5dcba7",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": ""
-                },
-                {
-                    "name": "Redo",
-                    "type": "Button",
-                    "id": "2e959742-3745-4800-a0db-cd1ab1ec3d86",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -855,70 +847,81 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "a9d0bed3-fd70-4015-8f17-f455ecf83a1c",
-                    "path": "<Keyboard>/leftBracket",
+                    "name": "1D Axis",
+                    "id": "abb3629e-5860-42da-993c-88f347829e52",
+                    "path": "1DAxis",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Undo",
-                    "isComposite": false,
+                    "groups": "",
+                    "action": "UndoRedo",
+                    "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "0dca05c7-7a05-40b4-9a77-1451476386d8",
+                    "name": "negative",
+                    "id": "e4940a3f-f2e3-49a8-9f0b-f3cf591e820a",
                     "path": "<Keyboard>/comma",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Undo",
+                    "action": "UndoRedo",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 },
                 {
-                    "name": "",
-                    "id": "2468cc8e-c1a7-4530-9122-c4ba24fa0cce",
+                    "name": "negative",
+                    "id": "099f36d4-e35b-4cd1-8562-d44ca4135888",
+                    "path": "<Keyboard>/leftBracket",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "UndoRedo",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "negative",
+                    "id": "d3131cd8-0520-4a94-a6ec-336f38b18f1c",
                     "path": "<Mouse>/backButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Undo",
+                    "action": "UndoRedo",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 },
                 {
-                    "name": "",
-                    "id": "720da293-f624-4ea4-ab79-755a3a4f9ae2",
-                    "path": "<Keyboard>/rightBracket",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Redo",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "0e5b6d2c-12b9-4a5b-96cd-184a671ed33b",
+                    "name": "positive",
+                    "id": "144c6ab6-2729-4deb-aa4c-5f1968d6e91e",
                     "path": "<Keyboard>/period",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Redo",
+                    "action": "UndoRedo",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 },
                 {
-                    "name": "",
-                    "id": "95d8e66b-1c00-4eeb-a306-50add0be985e",
+                    "name": "positive",
+                    "id": "e610e917-c394-4851-b69a-16d3b3d1beea",
+                    "path": "<Keyboard>/rightBracket",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "UndoRedo",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "45844db1-d6c6-4aea-8f00-2ebdd21f04e1",
                     "path": "<Mouse>/forwardButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Redo",
+                    "action": "UndoRedo",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 }
             ]
         }

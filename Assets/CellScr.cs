@@ -38,6 +38,9 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public InputScr InputScript;
     public Transform AxisChild;
 
+    public Color BaseColor;
+    public SpriteRenderer CellSpr;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -46,6 +49,7 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         CellState = 2;
         InputScript = GameObject.Find("InputObj").GetComponent<InputScr>();
         AxisChild = transform.Find("Axis");
+        CellSpr = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -125,27 +129,37 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             Anim.SetLayerWeight(1, 1f);
             if (CellState == 0 || CellState == 1)
             {
-                if (CellState == CorrectCellState) { GetComponent<SpriteRenderer>().color = Color.green; } else { GetComponent<SpriteRenderer>().color = Color.red; }
+                if (CellState == CorrectCellState) { CellSpr.color = Color.green; } else { CellSpr.color = Color.red; }
             }
             else
             {
-                if (CorrectCellState == 0) { GetComponent<SpriteRenderer>().color = Color.green; } else { GetComponent<SpriteRenderer>().color = Color.red; }
+                if (CorrectCellState == 0) { CellSpr.color = Color.green; } else { CellSpr.color = Color.red; }
             }
         }
         else 
         {
             Anim.SetLayerWeight(0, 1f);
             Anim.SetLayerWeight(1, 0f);
-            GetComponent<SpriteRenderer>().color = Color.white;
-        }             
+            if (InputScript.SelGrid.RawCo.x == GridCo.x || InputScript.SelGrid.RawCo.y == GridCo.y)
+            {
+                CellSpr.color = new Color(0.75f, 0.75f, 0.75f, CellSpr.color.a);
+            }
+            else
+            {
+                CellSpr.color = BaseColor;
+            }
+        }
     }
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
-        InputScript.SelGrid.ControlState = 1;
-        PointedAt = true;
-        InputScript.AttemptRawMovement(CheckVectorLength(GridCo, InputScript.SelGrid.RawCo));
-        InputScript.AttemptSelMovement(CheckVectorLength(GridCo, InputScript.SelGrid.SelCo));        
+        if (InputScript != null)
+        {
+            InputScript.SelGrid.ControlState = 1;
+            PointedAt = true;
+            InputScript.AttemptRawMovement(CheckVectorLength(GridCo, InputScript.SelGrid.RawCo));
+            InputScript.AttemptSelMovement(CheckVectorLength(GridCo, InputScript.SelGrid.SelCo));
+        }
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
