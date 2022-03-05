@@ -58,7 +58,7 @@ public class GridScr : MonoBehaviour
             new PPUClass{ GridSize = 15, PPU = 150},
             new PPUClass{ GridSize = 20, PPU = 125},
             new PPUClass{ GridSize = 25, PPU = 100},
-            new PPUClass{ GridSize = 30, PPU = 75},
+            new PPUClass{ GridSize = 30, PPU = 92},
         };
 
     //Prefabs and some misc stats
@@ -78,12 +78,14 @@ public class GridScr : MonoBehaviour
     public int HistoryPointer = -1;
     public bool EditedThisFrame = false;
 
-    public double GridWidth;
-    public double GridHeight;
+    //This stores the physical size of the grid including clues etc.
+    public double GridWidthLength;
+    public double GridHeightLength;
     public double AdjustedGridWidth;
     public double AdjustedGridHeight;
     public int LongestSide;
 
+    //this is the amount of cells in a grid ie. 10x10, 15x10 etc.
     public int GridHori;
     public int GridVert;
 
@@ -275,7 +277,7 @@ public class GridScr : MonoBehaviour
             Clue.transform.Find("Background").GetComponent<RectTransform>().localScale = new Vector2((float)(CellSize * 100) * 2, (float)(CellSize * 100) * 10);
             Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color =
             new Color(Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.r, Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.g, Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.b,
-            0.5f - (0.25f * (X % 2)));
+            0.75f - (0.25f * (X % 2)));
             Clue.GetComponent<RectTransform>().sizeDelta = new Vector2((float)CellSize * 200, 256);
             Clue.GetComponent<TextMeshPro>().text = ClueList;
             GridArr[X, 0].ClueObjCla.Obj = Clue;
@@ -283,7 +285,8 @@ public class GridScr : MonoBehaviour
             GridArr[X, 0].ClueObjCla.Scr.ClueCo = new Vector2Int(X, 0);
             GridArr[X, 0].ClueObjCla.Scr.BGBaseColor = GridArr[X, 0].ClueObjCla.Scr.BGSpr.color;
         }
-       
+        InputScript.UIWidthInput.GetComponent<TMP_InputField>().text = GridHori.ToString();
+        InputScript.UIHeightInput.GetComponent<TMP_InputField>().text = GridVert.ToString();
         CenterCamera();
         SaveGridState();
     }
@@ -383,7 +386,28 @@ public class GridScr : MonoBehaviour
             state = 2;
         }
         GridArr[cell.x, cell.y].CellCla.State = state; GridArr[cell.x, cell.y].CellCla.Script.CellState = state;
+        PlayAudioOnCell(cell, sendstate, state);
         EditedThisFrame = true;
+    }
+
+    void PlayAudioOnCell(Vector2Int cell, int sendstate, int state = -1)
+    {
+        if(state == -1)
+        {
+
+        }
+        if (sendstate == 1)
+        {
+            GridArr[cell.x, cell.y].CellCla.Script.PlayPop();
+        }
+        else if (sendstate == 0)
+        {
+            GridArr[cell.x, cell.y].CellCla.Script.PlaySwipe();
+        }
+        else if (sendstate == 2)
+        {
+
+        }        
     }
 
     Vector2Int CheckVectorLengthAbs(Vector2Int a, Vector2Int b)
@@ -421,7 +445,6 @@ public class GridScr : MonoBehaviour
     //Functioning similar to a 1D vector, we allow redo and undos only if one of their buttons is being pressed. If both are pressed, nothing happens.
     public void UndoRedoGrid(int vec)
     {
-
         if (vec == 0) { return; } 
         else
         {
@@ -461,10 +484,10 @@ public class GridScr : MonoBehaviour
 
     void CenterCamera()
     {
-        GridWidth = CellSize * (GridArr.GetLength(0) - 2);
-        GridHeight = CellSize * (GridArr.GetLength(1) - 2);
-        AdjustedGridWidth = GridWidth / 2 - CellSize;
-        AdjustedGridHeight = GridHeight / 2 - CellSize * 1.5;
+        GridWidthLength = CellSize * (GridArr.GetLength(0) - 2);
+        GridHeightLength = CellSize * (GridArr.GetLength(1) - 2);
+        AdjustedGridWidth = GridWidthLength / 2 - CellSize;
+        AdjustedGridHeight = GridHeightLength / 2 - CellSize * 1.5;
         LongestSide = Mathf.Max(GridArr.GetLength(0) - 1, GridArr.GetLength(1) - 1);
 
         int PPUToUse = PPUArr[0].PPU;

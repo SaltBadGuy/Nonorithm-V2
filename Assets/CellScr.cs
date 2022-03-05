@@ -41,6 +41,9 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Color BaseColor;
     public SpriteRenderer CellSpr;
 
+    public AudioClip PopAud;
+    public AudioClip SwipeAud;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -155,8 +158,9 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         if (InputScript != null)
         {
-            InputScript.SelGrid.ControlState = 1;
+            //InputScript.SelGrid.ControlState = 1;
             PointedAt = true;
+            InputScript.SelGrid.CursorOnGrid = true;
             InputScript.AttemptRawMovement(CheckVectorLength(GridCo, InputScript.SelGrid.RawCo));
             InputScript.AttemptSelMovement(CheckVectorLength(GridCo, InputScript.SelGrid.SelCo));
         }
@@ -164,7 +168,8 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
-        InputScript.SelGrid.ControlState = 0;
+        //InputScript.SelGrid.ControlState = 0;
+        InputScript.SelGrid.CursorOnGrid = false;
         PointedAt = false;
     }
 
@@ -182,5 +187,15 @@ public class CellScr : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         Diff.x = a.x - b.x;
         Diff.y = a.y - b.y;
         return Diff;
+    }
+
+    public void PlayPop()
+    {
+        AudioSource.PlayClipAtPoint(PopAud, transform.position);
+    }
+
+    public void PlaySwipe()
+    {
+        AudioSource.PlayClipAtPoint(SwipeAud, transform.position);
     }
 }

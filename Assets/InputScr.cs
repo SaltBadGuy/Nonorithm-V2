@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class InputScr : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class InputScr : MonoBehaviour
         public Vector2Int MinCo = new Vector2Int(1,1);
         public Vector2Int MaxCo = new Vector2Int(1,1);
         public bool ButtonHeld = false;
+        public bool CursorOnGrid = false;
         public int ControlState = 0;
     }
 
@@ -64,6 +66,9 @@ public class InputScr : MonoBehaviour
     public GameObject RawSelectIndiPre;
     GameObject RawSelectIndi;
 
+    public GameObject UIWidthInput;
+    public GameObject UIHeightInput;
+
     //This class lets us have behaviour for holding down a button similar to holding down a key in a word processor (ie. you must hold the button down for it for HoldInterval to start repeating the action at RepeatIntervals)
     public InputHandle MoveInput = new InputHandle { };
     public InputHandle EmptyInput = new InputHandle { };
@@ -84,7 +89,7 @@ public class InputScr : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
         if (GridScript.GridArr != null)
         {
@@ -93,7 +98,7 @@ public class InputScr : MonoBehaviour
                 SelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Obj.transform.position.x, GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Obj.transform.position.y, -2);
                 RawSelectIndi.transform.position = new Vector3(GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.Obj.transform.position.x, GridScript.GridArr[SelGrid.RawCo.x, SelGrid.RawCo.y].CellCla.Obj.transform.position.y, -1);
 
-            }            
+            }
         }
         else
         {
@@ -109,7 +114,6 @@ public class InputScr : MonoBehaviour
         AttemptEditGrid(FillInput);
         AttemptEditGrid(MarkInput);
         AttemptUndoRedo();
-        AttemptHighlight();
     }
 
     void CheckAxis()
@@ -279,8 +283,8 @@ public class InputScr : MonoBehaviour
         else if (SelGrid.ControlState == 1 && hi.ButtonState == 1)
         {
             //We check if the mouse is actually on a cell before continuing (ie. we don't want a click to fill the last chosen cell if the pointer isn't on the grid at all)
-            //This isn't checked if the axis has been locked as we wish to allow players to not necessarily be on the cell, as long as it's parallel.
-            if (SelGrid.ButtonHeld || GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Script.PointedAt)
+            //This isn't checked if the axis has been locked as we wish to allow players to not necessarily be on the cell, as long as it's parallel. We still check if the cursor is actually on the grid however.
+            if ((SelGrid.ButtonHeld || GridScript.GridArr[SelGrid.SelCo.x, SelGrid.SelCo.y].CellCla.Script.PointedAt) && SelGrid.CursorOnGrid)
             {
                 hi.RepeatTimes++;
                 GridScript.AttemptEdit(hi);
@@ -302,40 +306,58 @@ public class InputScr : MonoBehaviour
         else if (ctx.canceled) { hi.ButtonState = 0; }
     }
 
-    public void Empty(InputAction.CallbackContext context)
+    public void InputEmpty(InputAction.CallbackContext context)
     {
         GetStateFromInput(EmptyInput, context);
     }
 
-    public void Fill(InputAction.CallbackContext context)
+    public void InputFill(InputAction.CallbackContext context)
     {
         GetStateFromInput(FillInput, context);
     }
 
-    public void Mark(InputAction.CallbackContext context)
+    public void InputMark(InputAction.CallbackContext context)
     {
         GetStateFromInput(MarkInput, context);
     }
 
-    public void UndoRedo(InputAction.CallbackContext context)
+    public void UIEmpty()
+    {
+        Debug.Log("UIEMPTY");
+    }
+
+    public void InputUndoRedo(InputAction.CallbackContext context)
     {
         UndoRedoInput.Dir.x = (int)context.ReadValue<float>();
     }
 
-    public void Movement(InputAction.CallbackContext context)
+    public void UIUndo()
+    {
+        GridScript.UndoRedoGrid(-1);
+    }
+
+    public void UIRedo()
+    {
+        GridScript.UndoRedoGrid(1);
+    }
+
+    public void InputMovement(InputAction.CallbackContext context)
     {
         SelGrid.ControlState = 0;
         MoveInput.Dir.x = (int)context.ReadValue<Vector2>().x; MoveInput.Dir.y = (int)context.ReadValue<Vector2>().y;
     }
 
-    public void MouseMovement(InputAction.CallbackContext context)
+    public void UIMovement()
     {
-        if (context.started) {
-            SelGrid.ControlState = 1;
-        }
+        SelGrid.ControlState = 0;
     }
 
-    public void ShowSolution(InputAction.CallbackContext context)
+    public void InputMouseMovement(InputAction.CallbackContext context)
+    {
+        SelGrid.ControlState = 1;
+    }
+
+    public void InputShowSolution(InputAction.CallbackContext context)
     {
         if (context.started)
         {
@@ -349,7 +371,18 @@ public class InputScr : MonoBehaviour
         }
     }
 
-    public void ClearAll(InputAction.CallbackContext context)
+    public void ShowSolution()
+    {
+        for (int x = 1; x < GridScript.GridArr.GetLength(0); x++)
+        {
+            for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+            {
+                GridScript.GridArr[x, Y].CellCla.Script.ShowSolution ^= true;
+            }
+        }
+    }
+
+    public void InputClearAll(InputAction.CallbackContext context)
     {
         if (context.started)
         {
@@ -363,36 +396,71 @@ public class InputScr : MonoBehaviour
         }
     }
 
-    public void ClearMarks(InputAction.CallbackContext context)
+    public void ClearAll()
+    {
+        for (int X = 1; X < GridScript.GridArr.GetLength(0); X++)
+        {
+            for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+            {
+                GridScript.Edit(new Vector2Int(X, Y), 2);
+            }
+        }
+    }
+
+    public void InputClearMarks(InputAction.CallbackContext context)
     {
         if (context.started)
         {
-            for (int X = 1; X < GridScript.GridArr.GetLength(0); X++)
+            ClearMarks();
+        }
+    }
+
+    public void ClearMarks()
+    {
+        for (int X = 1; X < GridScript.GridArr.GetLength(0); X++)
+        {
+            for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
             {
-                for (int Y = 1; Y < GridScript.GridArr.GetLength(1); Y++)
+                if (GridScript.GridArr[X, Y].CellCla.Script.CellState == 3)
                 {
-                    if (GridScript.GridArr[X, Y].CellCla.Script.CellState == 3)
-                    {
-                        GridScript.Edit(new Vector2Int(X,Y), 2);
-                    }
+                    GridScript.Edit(new Vector2Int(X, Y), 2);
                 }
             }
         }
     }
 
-    public void GenerateGrid(InputAction.CallbackContext context)
+    public void InputGenerateGrid(InputAction.CallbackContext context)
     {
         if (context.started)
         {
-            int[,] RanGrid = GridScript.RandomGridGen(GridScript.GridHori, GridScript.GridVert);
-            GridScript.GridGenFromSol(RanGrid);
+            GenerateGrid();
         }
     }
 
-    //LIKELY NOT USED SINCE WILL BE HANDLED BY CLUEOBJ ITSELF
-    void AttemptHighlight()
+    public void UIDimensionChange()
     {
-        //GridScript.GridArr[SelGrid.SelCo.x, 0].ClueBGSpr.color = Color.yellow;
-        //GridScript.GridArr[SelGrid.SelCo.y, 0].ClueBGSpr.color = Color.yellow;
+        if (int.Parse(UIWidthInput.GetComponent<TMP_InputField>().text) <= 30)
+        {
+            GridScript.GridHori = int.Parse(UIWidthInput.GetComponent<TMP_InputField>().text);
+        }
+        else
+        {
+            GridScript.GridHori = 30;
+        }
+
+        if (int.Parse(UIHeightInput.GetComponent<TMP_InputField>().text) <= 30)
+        {
+            GridScript.GridVert = int.Parse(UIHeightInput.GetComponent<TMP_InputField>().text);
+        }
+        else
+        {
+            GridScript.GridVert = 30;
+        }
+    }
+
+    public void GenerateGrid()
+    {
+        int[,] RanGrid = GridScript.RandomGridGen(GridScript.GridHori, GridScript.GridVert);
+        GridScript.GridGenFromSol(RanGrid);
     }
 }
