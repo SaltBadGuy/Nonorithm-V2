@@ -27,9 +27,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8219283216053786076
 MonoBehaviour:
@@ -44,6 +45,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CellPre: {fileID: 7264120291849284798, guid: 3dde02027bcee0a48b70bc4ff6c348bc, type: 3}
-  CluePre: {fileID: 878056883550846811, guid: 69b6ba167db605647b31e46e96b8b17b, type: 3}
+  CluePre: {fileID: 0}
+  DividerPre: {fileID: 3118962044461510284, guid: 70a82efa35d57244ca58a3bdbbd77738, type: 3}
+  GridCamera: {fileID: 0}
+  ClueCamera: {fileID: 0}
+  Background: {fileID: 0}
+  HistoryTxt: {fileID: 0}
+  HistoryPlaceholderTxt: {fileID: 0}
   CellSize: 0
+  ClueSize: {x: 0, y: 0}
   InputScript: {fileID: 0}
+  HistoryPointer: -1
+  GridWidthLength: 0
+  GridHeightLength: 0
+  AdjustedGridWidth: 0
+  AdjustedGridHeight: 0
+  LongestSide: 0
+  GridHori: 6
+  GridVert: 6

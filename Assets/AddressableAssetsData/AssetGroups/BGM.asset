@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: BGM
+  m_EditorClassIdentifier: 
+  m_GroupName: BGM
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 2b9d44ff249b11948a9de235aab8231d
+  m_SerializeEntries:
+  - m_GUID: 51e92af62d409644484d986eed8dfb53
+    m_Address: Assets/Audio/BGM/On The Outer.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BGM
+  - m_GUID: 1f18193afa42d5d4db6464302752118e
+    m_Address: Assets/Audio/BGM/Wet Lunch.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BGM
+  - m_GUID: 6b6cb2110c6627344ac523ab6bb8875c
+    m_Address: Assets/Audio/BGM/Mystic Tides.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BGM
+  - m_GUID: b56857018e280cc49bab947bc899d23c
+    m_Address: Assets/Audio/BGM/Eddie Marsan Calms Down.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BGM
+  - m_GUID: ae0ca55d2c75264458cca6ba776672b5
+    m_Address: Assets/Audio/BGM/Call Doctor Birch, 0-800.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BGM
+  - m_GUID: 47055acfc3d94df46abea9a173f16dd1
+    m_Address: Assets/Audio/BGM/Aerial Tombs.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BGM
+  - m_GUID: 422b079e5ce9fe441a0bbc79e5ad48a7
+    m_Address: Assets/Audio/BGM/Oracle Night.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - BGM
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: e8e5b60ee46f0fa48a2f8d1c734b9688, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 9615312f2c33fe44187bd9e981bcaa19, type: 2}
+    - {fileID: 11400000, guid: 0262dc4ae8f94dd4193343c025c4cf21, type: 2}

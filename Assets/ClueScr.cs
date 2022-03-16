@@ -29,7 +29,7 @@ public class ClueScr : MonoBehaviour
     {
         if (InputScript.SelGrid.RawCo.x == ClueCo.x || InputScript.SelGrid.RawCo.y == ClueCo.y)
         {
-            BGSpr.color = new Color(1, BGSpr.color.g, BGSpr.color.b, 0.75f);
+            BGSpr.color = new Color(1, BGSpr.color.g, BGSpr.color.b, BGSpr.color.a);
         }
         else
         {

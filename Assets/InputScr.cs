@@ -59,6 +59,7 @@ public class InputScr : MonoBehaviour
     }
 
     public GridScr GridScript;
+    public BGMScr BGMScript;
     public SelectIndice SelGrid;
     public GameObject SelectIndiPre;
     GameObject SelectIndi;
@@ -68,6 +69,7 @@ public class InputScr : MonoBehaviour
 
     public GameObject UIWidthInput;
     public GameObject UIHeightInput;
+    public GameObject UIHistoryInput;
 
     //This class lets us have behaviour for holding down a button similar to holding down a key in a word processor (ie. you must hold the button down for it for HoldInterval to start repeating the action at RepeatIntervals)
     public InputHandle MoveInput = new InputHandle { };
@@ -456,6 +458,31 @@ public class InputScr : MonoBehaviour
         {
             GridScript.GridVert = 30;
         }
+    }
+
+    public void UIHistoryChange()
+    {
+        int targetindice = 0;
+        if (int.Parse(UIHistoryInput.GetComponent<TMP_InputField>().text) >= GridScript.GridArr[0,0].GridHistory.Count)
+        {
+            Debug.Log("TOO BIG");
+            targetindice = GridScript.GridArr[0, 0].GridHistory.Count - 1;
+        }
+        else if (int.Parse(UIHistoryInput.GetComponent<TMP_InputField>().text) < 0)
+        {
+            Debug.Log("TOO SMALL");
+            targetindice = 0;
+        }
+        else
+        {
+            targetindice = int.Parse(UIHistoryInput.GetComponent<TMP_InputField>().text);
+        }
+        GridScript.UndoRedoGrid(0, targetindice);
+    }
+
+    public void ShuffleMusic()
+    {
+        BGMScript.Shuffle();
     }
 
     public void GenerateGrid()

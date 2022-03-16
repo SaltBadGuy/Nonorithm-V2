@@ -40,6 +40,7 @@ public class GridScr : MonoBehaviour
         public ClueObjClass ClueObjCla;
         public CellClass CellCla;
         public List<int[,]> GridHistory;
+        public List<GameObject> Aesthetics;
         public int[,] CurrentState;
     }
 
@@ -65,10 +66,14 @@ public class GridScr : MonoBehaviour
     //CellSize is calculated, this uses the width since the cell should be a square in any case.
     public GameObject CellPre;
     public GameObject CluePre;
+    public GameObject DividerPre;
 
     public Camera GridCamera;
     public Camera ClueCamera;
     public GameObject Background;
+
+    public TextMeshProUGUI HistoryTxt;
+    public TextMeshProUGUI HistoryPlaceholderTxt;
 
     public double CellSize;
     public Vector2 ClueSize;
@@ -76,7 +81,6 @@ public class GridScr : MonoBehaviour
     public InputScr InputScript;
     public GridClass[,] GridArr;
     public int HistoryPointer = -1;
-    public bool EditedThisFrame = false;
 
     //This stores the physical size of the grid including clues etc.
     public double GridWidthLength;
@@ -102,10 +106,13 @@ public class GridScr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        HistoryTxt = GameObject.Find("HistoryText").GetComponent<TextMeshProUGUI>();
+        HistoryPlaceholderTxt = GameObject.Find("HistoryPlaceholder").GetComponent<TextMeshProUGUI>();
         CellSize = Math.Round(CellPre.GetComponent<SpriteRenderer>().bounds.size.x, 2);
         ClueSize = new Vector2(CluePre.GetComponent<RectTransform>().sizeDelta.x * CluePre.transform.localScale.x, CluePre.GetComponent<RectTransform>().sizeDelta.x * CluePre.transform.localScale.y);
         TestGrid = RandomGridGen(GridHori, GridVert);
-        GridGenFromSol(TestGrid);        
+        GridGenFromSol(TestGrid);
+        
     }
 
     public int[,] RandomGridGen(int gWidth, int gHeight)
@@ -126,20 +133,12 @@ public class GridScr : MonoBehaviour
     void Update()
     {
         ClueCamera.orthographicSize = GridCamera.orthographicSize;
-        EditedThisFrame = false;
-
+        HistoryTxt.text = HistoryPointer.ToString();
+        HistoryPlaceholderTxt.text = HistoryPointer.ToString();
         //No earthly clue why either of these are needed, they just are (without them, they don't display until you change a property in the inspector.)
         //Background.transform.position = new Vector3(0, 0, 10);
         //GridCamera.GetComponent<Camera>().cullingMask = 1 << 3;
-        
-    }
 
-    private void LateUpdate()
-    {
-        if (EditedThisFrame)
-        {
-            SaveGridState();
-        }
     }
 
     //This generates a grid from a 2D array of integers referencing a Solution for a picross board
@@ -161,6 +160,7 @@ public class GridScr : MonoBehaviour
         {
             CurrentState = new int[Grid.GetLength(0) + 1, Grid.GetLength(1) + 1],
             GridHistory = new List<int[,]>(),
+            Aesthetics = new List<GameObject>()
         };
         InputScript.SelGrid.MaxCo = new Vector2Int(GridArr.GetLength(0) - 1, GridArr.GetLength(1) - 1);
 
@@ -229,6 +229,41 @@ public class GridScr : MonoBehaviour
             }
         }
 
+        for (int X = 6; X < GridArr.GetLength(0); X++)
+        {
+            //For aesthetic reasons, we draw dividers between each 5x5 block of cells
+            if (X % 5 == 1)
+            {
+                GameObject Divider;
+                Divider = Instantiate(DividerPre, new Vector3(
+                    (float)(GridArr[X, 1].CellCla.Obj.transform.position.x - CellSize / 2f),
+                    (float)-(CellSize * (GridArr.GetLength(0) - 1) / 2 - (CellSize / 2f)),
+                    0),
+                    Quaternion.identity,
+                    gameObject.transform);
+                Divider.name = X - 1 + " Row Divider";
+                Divider.transform.localScale = new Vector3(Divider.transform.localScale.x, Divider.transform.localScale.y * (GridArr.GetLength(1) - 1), Divider.transform.localScale.z);
+                GridArr[0, 0].Aesthetics.Add(Divider);
+            }
+        }
+
+        for (int Y = 6; Y < GridArr.GetLength(1); Y++)
+        {
+            if (Y % 5 == 1)
+            {
+                GameObject Divider;
+                Divider = Instantiate(DividerPre, new Vector3(
+                    (float)(CellSize * (GridArr.GetLength(1) - 1) / 2 - (CellSize / 2f)),
+                    (float)(GridArr[1, Y].CellCla.Obj.transform.position.y + CellSize / 2f),
+                    0),
+                    Quaternion.Euler(0,0,90),
+                    gameObject.transform);
+                Divider.name = Y - 1 + " Column Divider";
+                Divider.transform.localScale = new Vector3(Divider.transform.localScale.x, Divider.transform.localScale.y * (GridArr.GetLength(0) - 1), Divider.transform.localScale.z);
+                GridArr[0, 0].Aesthetics.Add(Divider);
+            }
+        }
+
         //We now generate a string to be displayed as clues on the rows and columns
         for (int Y = 1; Y <= Grid.GetLength(1); Y++)
         {
@@ -245,8 +280,7 @@ public class GridScr : MonoBehaviour
             Clue.name = "Row " + Y + " Clue";
             Clue.transform.Find("Background").GetComponent<RectTransform>().localScale = new Vector2((float)(CellSize * 100) * 10, (float)(CellSize * 100) * 2);
             Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color =
-            new Color(Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.r, Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.g, Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.b,
-            0.5f - (0.25f * (Y % 2)));
+            new Color(0.2f - (0.1f * (Y % 2)), 0.2f - (0.1f * (Y % 2)), 0.2f - (0.1f * (Y % 2)), Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.a);
             Clue.GetComponent<TextMeshPro>().text = ClueList;
             Clue.GetComponent<TextMeshPro>().alignment = TextAlignmentOptions.MidlineRight;
             Clue.GetComponent<TextMeshPro>().wordSpacing = 25;
@@ -276,8 +310,8 @@ public class GridScr : MonoBehaviour
             Clue.name = "Column " + X + " Clue";
             Clue.transform.Find("Background").GetComponent<RectTransform>().localScale = new Vector2((float)(CellSize * 100) * 2, (float)(CellSize * 100) * 10);
             Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color =
-            new Color(Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.r, Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.g, Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.b,
-            0.75f - (0.25f * (X % 2)));
+            new Color(0.2f - (0.1f * (X % 2)), 0.2f - (0.1f * (X % 2)), 0.2f - (0.1f * (X % 2)), Clue.transform.Find("Background").GetComponent<SpriteRenderer>().color.a);
+
             Clue.GetComponent<RectTransform>().sizeDelta = new Vector2((float)CellSize * 200, 256);
             Clue.GetComponent<TextMeshPro>().text = ClueList;
             GridArr[X, 0].ClueObjCla.Obj = Clue;
@@ -285,6 +319,7 @@ public class GridScr : MonoBehaviour
             GridArr[X, 0].ClueObjCla.Scr.ClueCo = new Vector2Int(X, 0);
             GridArr[X, 0].ClueObjCla.Scr.BGBaseColor = GridArr[X, 0].ClueObjCla.Scr.BGSpr.color;
         }
+
         InputScript.UIWidthInput.GetComponent<TMP_InputField>().text = GridHori.ToString();
         InputScript.UIHeightInput.GetComponent<TMP_InputField>().text = GridVert.ToString();
         CenterCamera();
@@ -387,7 +422,7 @@ public class GridScr : MonoBehaviour
         }
         GridArr[cell.x, cell.y].CellCla.State = state; GridArr[cell.x, cell.y].CellCla.Script.CellState = state;
         PlayAudioOnCell(cell, sendstate, state);
-        EditedThisFrame = true;
+        SaveGridState();
     }
 
     void PlayAudioOnCell(Vector2Int cell, int sendstate, int state = -1)
@@ -426,10 +461,12 @@ public class GridScr : MonoBehaviour
         }
         
         HistoryPointer++;
+
         /*
-         *In the case where we are not at the latest grid state(ie.we have done at least 1 undo) we check if this newly saved state is the same as the next state in the list.
+         *In the case where we are not at the latest grid state(ie. we have done at least 1 undo) we check if this newly saved state is the same as the next state in the list.
          *If not, we clear the list of saved states after our newly saved state as they'll no longer be compatiable (similar to going backwards and forwards on a browser)
         */
+
         if (HistoryPointer < GridArr[0, 0].GridHistory.Count)
         {
             if (!Check2DArrays(GridArr[0, 0].CurrentState, GridArr[0, 0].GridHistory[HistoryPointer]))
@@ -443,16 +480,22 @@ public class GridScr : MonoBehaviour
     }
 
     //Functioning similar to a 1D vector, we allow redo and undos only if one of their buttons is being pressed. If both are pressed, nothing happens.
-    public void UndoRedoGrid(int vec)
+    public void UndoRedoGrid(int vec, int targetindice = -1)
     {
-        if (vec == 0) { return; } 
+        if (targetindice != -1)
+        {
+            HistoryPointer = targetindice;
+        }
         else
         {
-            HistoryPointer += 1 * vec;
-            if (HistoryPointer < 0) { HistoryPointer = 0; return; }; if(HistoryPointer > GridArr[0,0].GridHistory.Count - 1) { HistoryPointer = GridArr[0, 0].GridHistory.Count - 1; return; }
-        }
-
-        InputScript.UndoRedoInput.RepeatTimes++;
+            if (vec == 0) { return; }
+            else
+            {
+                HistoryPointer += 1 * vec;
+                if (HistoryPointer < 0) { HistoryPointer = 0; return; }; if (HistoryPointer > GridArr[0, 0].GridHistory.Count - 1) { HistoryPointer = GridArr[0, 0].GridHistory.Count - 1; return; }
+            }
+            InputScript.UndoRedoInput.RepeatTimes++;
+        }        
 
         for (int X = 1; X < GridArr.GetLength(0); X++)
         {
